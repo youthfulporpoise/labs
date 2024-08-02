@@ -24,8 +24,10 @@ void read_array(int *array, size_t n)
  * which may be empty. */
 void print_array(char *msg, int *array, size_t n)
 {
-    printf("%s", msg);
-    for (size_t i = 0; i < n; ++i)
-        printf("%d ", array[i]);
+    size_t i = 0;
+    printf("%s[%d,", msg, array[i++]);
+    for (; i < n - 1; ++i)
+        printf(" %d,", array[i]);
+    printf(" %d]", array[i]);
     puts("");
 }
