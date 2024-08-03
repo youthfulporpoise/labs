@@ -48,6 +48,7 @@ int main()
 
     n--;
     print_array("Result: ", array, n);
+    return 0;
 }
 
 /* Perform linear search of a value in
