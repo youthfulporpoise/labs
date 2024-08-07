@@ -1,6 +1,6 @@
 class Area_30 {
     public static void main(String[] args) {
-        double radius = 47;
+        double radius = Double.valueOf(args[0]);
         System.out.println("Radius: " + radius + " => Area: " +
                            Math.pi * Math.pow(radius, 2));
     }
