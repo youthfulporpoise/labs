@@ -1,13 +1,8 @@
-/* 
- *  JOHN VON NEUMANN’S MERGESORT
- *  implemented recursively
- *  with logical splits
- */
 #include <stdio.h>
 
 int main ();
-void merge_sort (int*, size_t, int*, size_t);
-void merge (int*, size_t, int*, size_t);
+void merge_sort(int*, size_t, int*, size_t);
+void merge (int*, size_t, int*, size_t); 
 void print_array (char*, int*, size_t);
 void read_array (char*, int*, size_t);
 
@@ -19,6 +14,7 @@ int main()
     read_array("Array: ", a, n);
     merge_sort(a, n / 2, a + n / 2, n - n / 2);
     print_array("Result: ", a, n);
+
     return 0;
 }
 
@@ -42,15 +38,15 @@ void merge(int* a, size_t n, int* b, size_t m)
     for (i = 0; i < n + m; ++i) a[i] = tmp[i];
 }
 
+void read_array(char* msg, int* a, size_t n)
+{
+    printf("%s", msg);
+    for (size_t i = 0; i < n; ++i) scanf("%d", a + i);
+}
+
 void print_array(char* msg, int* a, size_t n)
 {
     printf("%s", msg);
     for (size_t i = 0; i < n; ++i) printf("%d ", a[i]);
     puts("");
-}
-
-void read_array(char* msg, int* a, size_t n)
-{
-    printf("%s", msg);
-    for (size_t i = 0; i < n; ++i) scanf("%d", a + i);
 }
