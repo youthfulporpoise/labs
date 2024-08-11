@@ -30,11 +30,11 @@ size_t binsrch(int* a, size_t n, int key)
 
     size_t m = (n - 1) / 2;
     if (a[m] > key) { 
-        size_t z = binsrch(a, m + 1, key);
+        size_t z = binsrch(a, m, key);
         if (z > m) return n;
         else return (z);
     } else if (a[m] < key)  {
-        size_t z = binsrch(a + m + 1, n - m - 1, key);
+        size_t z = binsrch(a + m + 1, n - m, key);
         if (z > m) return n;
         else return (m + z + 1);
     } else return m;
