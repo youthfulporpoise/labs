@@ -1,0 +1,11 @@
+1. Write a Java program that checks whether a string is palindrome or not.
+2. Write a Java program to find the frequency of a given character in a string.
+3. Write a Java program to multiply two given matrices.
+4. Write a Java program which creates a class named Employee which holds name,
+   age, address, phone number, and salary.  It also has an eponymous method 'printSalaryOf' 
+
+1. Write a Java program to revert a given string.
+2. Write a Java program to display the transpose of a given matrix.
+3. Write a Java program to find the second smallest element in an array.
+4. Write a Java program to calculate the area of different shapes, namely,
+   circle, rectangle, and triangle, using method overloading.
