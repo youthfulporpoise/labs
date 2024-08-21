@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 int main ();
-int ssort (int*, size_t);
+void ssort (int*, size_t);
 void swap (int*, int*);
 void read_array (char*, int*, size_t);
 void print_array (char*, int*, size_t);
@@ -17,7 +17,7 @@ int main()
 
 }
 
-int ssort(int* a, size_t n)
+void ssort(int* a, size_t n)
 {
     size_t min;
     for (size_t i = 0; i < n - 1; ++i) {
