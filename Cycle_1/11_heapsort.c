@@ -4,9 +4,11 @@ int main ();
 void heapsort (int*, size_t);
 void sift (int*, size_t);
 void rectify_heap (int*, size_t, size_t);
-void swap (int*, int*);
 void read_array (char*, int*, size_t);
 void print_array (char*, int*, size_t);
+
+int __tmp__;
+#define SWAP(x, y) { __tmp__ = (x); (x) = (y); (y) = __tmp__; }
 
 
 int main()
@@ -29,7 +31,7 @@ void heapsort(int *a, size_t n)
     p--;
     /* Swap and rectify. */
     while (p > 0) {
-        swap(a, a + p);
+        SWAP(a[0], a[p]);
         p--;
         rectify_heap(a, 0, p);
     }
@@ -39,7 +41,7 @@ void sift(int *a, size_t i)
 {  /* Sift the largest to the top. */
     if (i < 1) return;
     if (a[i] > a[i / 2]) {
-        swap(a + i, a + i / 2);
+        SWAP(a[i], a[i / 2]);
         sift(a, i / 2);
     } else return;
 }
@@ -53,15 +55,9 @@ void rectify_heap(int *a, size_t i, size_t t)
     if (rc <= t && a[rc] > a[max]) max = rc;
     if (max == i) return;
     else {
-        swap(a + i, a + max);
+        SWAP(a[i], a[max]);
         rectify_heap(a, max, t);
     }
-}
-
-void swap(int *a, int *b) {
-    int tmp = *a;
-    *a = *b;
-    *b = tmp;
 }
 
 void read_array(char* msg, int* a, size_t n)
