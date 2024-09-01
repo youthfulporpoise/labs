@@ -1,17 +1,17 @@
-import java.lang.Math;
-
 class Pascal_30 {
     public static void main(String[] args) {
         int n = Integer.valueOf(args[0]);
+        if (n < 1) return;
         int[][] pt = new int[n][n];
         int l = pascal(pt, n);
 
         for (int i = 0; i < n; ++i) {
-            int pad = (int) Math.ceil(l * (n - i) / 2);
+            System.out.print(String.format("%" + l + "d", i + 1) + ":");
+            int pad = l * (n - i);
             System.out.print(String.format("%" + pad + "c", ' '));
             for (int j = 0; j <= i; ++j) {
                 String s = String.format("%" + l + "d", pt[i][j]);
-                System.out.print(s + " ");
+                System.out.print(s + String.format("%" + l + "c", ' '));
             } System.out.println("");
         }
     }
@@ -27,6 +27,6 @@ class Pascal_30 {
                 high = pt[i][j] > high ? pt[i][j] : high;
             } pt[i][j] = 1;
         }
-        return (int) Math.floor(Math.log10(high) + 1);
+        return ("" + high).length();
     }
 }
