@@ -3,12 +3,15 @@
  * with Hoare's partition scheme
  */
 #include <stdio.h>
+#include <stdbool.h>
 
 int main ();
 void quicksort (int*, size_t);
-void swap (int*, int*, int*);
 void read_array (char*, int*, size_t);
 void print_array (char*, int*, size_t);
+
+int __tmp__;
+#define SWAP(a, b) { __tmp__ = (a);  (a) = (b); (b) = __tmp__; }
 
 int main()
 {
@@ -26,25 +29,20 @@ void quicksort(int *a, size_t n)
 {
     if (n <= 1) return;
 
-    size_t p = 0, q = 1, r = n - 1;
+    int pivot = a[n / 2];
+    size_t q = 0, r = n - 1;
     while (q <= r) {
-        if (a[r] < a[p]) {
-            swap(a + p, a + q, a + r);
-            p++; q++;
-            if (a[r] > a[p]) r--;
-        } else r--;
+        while (a[q] < pivot) q++;
+        while (a[r] > pivot) r--;
+        if (q >= r) break;
+        else {
+            SWAP(a[q], a[r]);
+            q++; r--;
+        }
     }
 
-    quicksort(a, p);
-    quicksort(a + p + 1, n - p - 1);
-}
-
-void swap(int *a, int *b, int *c)
-{
-    int tmp = *c;
-    *c = *b;
-    *b = *a;
-    *a = tmp;
+    quicksort(a, q);
+    quicksort(a + q, n - q);
 }
 
 void read_array(char* msg, int* a, size_t n)
