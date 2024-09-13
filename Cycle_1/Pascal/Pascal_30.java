@@ -6,12 +6,11 @@ class Pascal_30 {
         int l = pascal(pt, n);
 
         for (int i = 0; i < n; ++i) {
-            System.out.print(String.format("%" + l + "d", i + 1) + ":");
+            System.out.printf("%" + l + "d" + ":", i + 1);
             int pad = l * (n - i);
-            System.out.print(String.format("%" + pad + "c", ' '));
+            System.out.printf("%" + pad + "c", ' ');
             for (int j = 0; j <= i; ++j) {
-                String s = String.format("%" + l + "d", pt[i][j]);
-                System.out.print(s + String.format("%" + l + "c", ' '));
+                System.out.printf("%"  + l + "d" + "%" + l + "c", pt[i][j], ' ');
             } System.out.println("");
         }
     }
