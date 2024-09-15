@@ -1,10 +1,11 @@
 import java.util.Scanner;
+import java.util.ArrayList;
 
 class Main {
     public static void main(String[] args) {
         Scanner kb = new Scanner(System.in);
         System.out.print("Stack size: "); int n = kb.nextInt();
-        Stack<Double> stack = new Stack<Double>(n);
+        Stack<Character> stack = new Stack<Character>(n);
 
         int choice;
         do {
@@ -13,20 +14,20 @@ class Main {
                     "(2)  Pop\n" +
                     "(3)  Display\n" +
                     "(-1) Quit\n" +
-                    "Choice:");
+                    "Choice: ");
             choice = kb.nextInt();
             switch (choice) {
                 case 1:
                     System.out.print("Element: ");
-                    try { stack.push(kb.nextDouble()); }
+                    try { stack.push(kb.next().charAt(0)); }
                     catch (StackFullException e) {
-                        System.out.println("The stack is full.");
+                        System.out.println("\nThe stack is full.");
                         continue;
                     } break;
                 case 2:
-                    try { System.out.println("Element: " + stack.pop()); }
+                    try { System.out.println("\nElement: " + stack.pop()); }
                     catch (StackEmptyException e) {
-                        System.out.println("The stack is empty.");
+                        System.out.println("\nThe stack is empty.");
                         continue;
                     } break;
                 case (3):
@@ -35,33 +36,35 @@ class Main {
                 case (-1):
                     return;
                 default:
-                    System.out.println("I don‘t understand.");
+                    System.out.println("\nI don‘t understand.");
                     continue;
             }
         } while (choice != -1);
     }
 }
 
-class Stack<T> {
+final class Stack<T> {
     T[] stack;
-    int top;
     int n;
+    int top;
 
     public Stack(int n) { 
         this.n = n;
-        stack = new T[n];
+        stack = (T[]) new Object[n];
         top = 0;
     }
 
     @Override
     public String toString() {
-        String s = new String("");
         if (top == 0) return "-/-";
-        for (int i = top; i >= 0;) s += stack[--i];
-        return s;
+        else {
+            String s = new String("");
+            for (int i = top; i > 0;) s += stack[--i] + " ";
+            return s;
+        }
     }
     public void push(T x) throws StackFullException { 
-        if (top <= n) stack[top++] = x;
+        if (top < n) stack[top++] = x;
         else throw new StackFullException();
     }
     public T pop() throws StackEmptyException {

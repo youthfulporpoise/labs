@@ -14,7 +14,7 @@ class Employee {
     }
 }
 
-class Engineer extends Employee {
+final class Engineer extends Employee {
     public void calcSalary() {
         System.out.println("Salary of an engineer: " + 20000);
         super.calcSalary();

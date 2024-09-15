@@ -74,7 +74,7 @@ class Employee {
     }
 }
 
-class Officer extends Employee {
+final class Officer extends Employee {
     String department;
     String specialization;
 
@@ -92,7 +92,7 @@ class Officer extends Employee {
     }
 }
 
-class Manager extends Employee {
+final class Manager extends Employee {
     String department;
     String specialization;
 
