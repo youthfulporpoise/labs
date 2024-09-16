@@ -1,0 +1,30 @@
+@startuml
+!theme plain
+hide circle
+
+package Main_30 <<Frame>> {
+    abstract class Shape {
+        ~ String name = "shape"
+        ~ int {abstract} numberOfSides()
+    }
+
+    Shape <|-- Triangle
+    class Triangle {
+        ~ String name = "triangle"
+        ~ int numberOfSides()
+    }
+
+    Shape <|-- Rectangle
+    class Rectangle {
+        ~ String name = "rectangle"
+        ~ int numberOfSides()
+    }
+
+    Shape <|-- Hexagon 
+    class Hexagon {
+        ~ String name = "hexagon"
+        ~ int numberOfSides()
+    }
+}
+
+@enduml
