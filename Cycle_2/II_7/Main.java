@@ -44,13 +44,13 @@ class Main {
 }
 
 final class Stack<T> {
-    T[] stack;
-    int n;
-    int top;
+    private T[] stack;
+    int size;
+    private int top;
 
     public Stack(int n) { 
-        this.n = n;
-        stack = (T[]) new Object[n];
+        this.size = n;
+        stack = (T[]) new Object[size];
         top = 0;
     }
 
@@ -64,7 +64,7 @@ final class Stack<T> {
         }
     }
     public void push(T x) throws StackFullException { 
-        if (top < n) stack[top++] = x;
+        if (top < size) stack[top++] = x;
         else throw new StackFullException();
     }
     public T pop() throws StackEmptyException {
