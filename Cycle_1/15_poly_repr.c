@@ -16,13 +16,13 @@ typedef struct Polynomial {
 /* Function declarations */
 int main ();
 void read_polynomial (Polynomial*);
-void print_polynomial (Polynomial);
+void print_polynomial (char*, Polynomial);
 
 int main()
 {
     Polynomial f;
     read_polynomial(&f);
-    print_polynomial(f);
+    print_polynomial("Result: ", f);
 }
 
 void read_polynomial(Polynomial* f) {
@@ -33,10 +33,9 @@ void read_polynomial(Polynomial* f) {
         scanf("%ld %ld", &f->p[i].c, &f->p[i].e);
 }
 
-void print_polynomial(Polynomial f) {
-    printf("Result: ");
-    size_t i;
-    for (i = 0; i < f.n; ++i) {
+void print_polynomial(char* msg, Polynomial f) {
+    printf("%s", msg);
+    for (size_t i = 0; i < f.n; ++i) {
         if (i != 0) {
             if (f.p[i].c < 0) {
                 printf(" - ");
