@@ -1,7 +1,7 @@
 import java.util.Scanner;
 import java.util.ArrayList;
 
-class Main {
+class Main_30 {
     public static void main(String[] args) {
         Scanner kb = new Scanner(System.in);
         System.out.print("Stack size: "); int n = kb.nextInt();
@@ -63,20 +63,23 @@ final class Stack<T> {
             return s;
         }
     }
-    public void push(T x) throws StackFullException { 
+    public void push(T x) throws FullException { 
         if (top < size) stack[top++] = x;
-        else throw new StackFullException();
+        else throw new FullException();
     }
-    public T pop() throws StackEmptyException {
+    public T pop() throws EmptyException {
         if (top > 0) return stack[--top];
-        else throw new StackEmptyException();
+        else throw new EmptyException();
     }
 }
 
-class StackEmptyException extends Exception {
-    StackEmptyException() { super("the stack is empty"); }
+final class Queue<T> {
 }
 
-class StackFullException extends Exception {
-    StackFullException() { super("the stack is full"); }
+class EmptyException extends Exception {
+    EmptyException() { super("the structure is empty"); }
+}
+
+class FullException extends Exception {
+    FullException() { super("the structure is full"); }
 } 

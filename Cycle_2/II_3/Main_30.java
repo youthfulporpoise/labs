@@ -1,7 +1,7 @@
 import java.time.Year;
 import java.util.Scanner;
 
-class II_3 {
+class Main_30 {
     public static void main(String[] args) {
         Scanner kb = new Scanner(System.in);
         kb.useDelimiter("\n");
