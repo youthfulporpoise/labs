@@ -56,6 +56,7 @@ Polynomial mult_polynomial(Polynomial f, Polynomial g) {
                     h.p[z].e = k;
                     h.p[z].c += f.p[i].c * g.p[j].c;
                     degree_exists = true;
+                    break;
                 }
             }
         }
