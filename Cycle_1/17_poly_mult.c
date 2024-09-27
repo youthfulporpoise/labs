@@ -44,7 +44,7 @@ int main()
 Polynomial mult_polynomial(Polynomial f, Polynomial g)
 {
     Polynomial h;
-    h.n = f.p[0].e * f.p[0].e;
+    h.n = f.p[0].e * g.p[0].e;
     h.p = calloc(h.n, sizeof (Term));
 
     size_t z = 0;
