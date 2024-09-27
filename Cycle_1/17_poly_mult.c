@@ -41,9 +41,10 @@ int main()
     return 0;
 }
 
-Polynomial mult_polynomial(Polynomial f, Polynomial g) {
+Polynomial mult_polynomial(Polynomial f, Polynomial g)
+{
     Polynomial h;
-    h.n = f.p[0].e * f.p[0].e;
+    h.n = f.p[0].e * g.p[0].e;
     h.p = calloc(h.n, sizeof (Term));
 
     size_t z = 0;
@@ -67,7 +68,8 @@ Polynomial mult_polynomial(Polynomial f, Polynomial g) {
     return h;
 }
 
-void read_polynomial(Polynomial* f) {
+void read_polynomial(Polynomial* f)
+{
     printf("\nNumber of terms: "); scanf("%zu", &f->n);
     f->p = malloc(f->n * sizeof (Term));
     printf("Coefficients and degrees: \n");
@@ -75,7 +77,8 @@ void read_polynomial(Polynomial* f) {
         scanf("%ld %ld", &f->p[i].c, &f->p[i].e);
 }
 
-void print_polynomial(char* msg, Polynomial f) {
+void print_polynomial(char* msg, Polynomial f)
+{
     printf("%s", msg);
     bool is_neg;
     for (size_t i = 0; i < f.n; ++i) {
