@@ -5,7 +5,7 @@
 int main (int, char**);
 void push (int);
 int pop ();
-void display (;
+void display ();
 
 int* stack;
 size_t top = 0;
