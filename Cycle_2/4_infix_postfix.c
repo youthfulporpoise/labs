@@ -6,6 +6,7 @@ char r[128]; size_t tr = 0; /* for operand and result.  */
 
 int main ();
 int prec (char);
+int assoc (char);
 
 int main()
 {
@@ -25,7 +26,10 @@ int main()
             }
         } else {
             if (to == 0) o[to++] = c;
-            else if (prec(c) > prec(o[to - 1])) o[to++] = c;
+            else if (assoc(c) == -1 && prec(c) > prec(o[to - 1]))
+                o[to++] = c;
+            else if (assoc(c) == 1 && prec(c) >= prec(o[to - 1]))
+                o[to++] = c;
             else {
                 while (to != 0 && o[to - 1] != '(' && prec(c) <= prec(o[to - 1]))
                     r[tr++] = o[--to];
@@ -49,5 +53,13 @@ int prec(char x)
     else if (x == '*' || x == '/') v = 1;
     else if (x == '^') v = 2;
     else if (x == '(') v = -1;
+    return v;
+}
+
+int assoc(char x)
+{
+    int v;
+    if (x == '^') v = 1;
+    else v = -1;
     return v;
 }
