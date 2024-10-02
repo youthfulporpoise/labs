@@ -40,7 +40,7 @@ int main()
                     break;
                 case '%':
                     y = r[--tr]; x = r[--tr];
-                    r[tr++] = x & y;
+                    r[tr++] = x % y;
                     break;
                 default:
                     fprintf(stderr, "invalid operator/function: %c\n", c);
