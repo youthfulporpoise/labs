@@ -9,8 +9,10 @@ class Main_30 {
             while (f.hasNextLine()) {
                 String line = f.nextLine();
                 l += 1;
-                c += line.length();
-                w += line.split(" ").length;
+                String[] words = line.strip().split("\\s+").length;
+                w += words.length;
+                for (String s : words)
+                    c += s.length();
             } System.out.printf("Lines: %d\nWords: %d\nCharacters: %d\n", l, w, c);
             f.close();
         } catch (FileNotFoundException e) {
