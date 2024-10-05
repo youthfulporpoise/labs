@@ -16,7 +16,7 @@ class Main_30 {
             System.out.println("Provide <source file> <destination file>");
             return;
         } catch (IOException e) {
-            System.out.printf("%s: cannot be opened\n", args[1]);
+            System.err.printf("%s: cannot be opened\n", args[1]);
             return;
         }
     }
