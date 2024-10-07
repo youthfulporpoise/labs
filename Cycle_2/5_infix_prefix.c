@@ -29,8 +29,8 @@ int main()
             }
         } else {
             if (to == 0) o[to++] = c;
-            else if (assoc(c) == -1 && prec(c) > prec(o[to - 1])) o[to++] = c;
-            else if (assoc(c) == 1 && prec(c) >= prec(o[to - 1])) o[to++] = c;
+            else if (assoc(c) == -1 && prec(c) >= prec(o[to - 1])) o[to++] = c;
+            else if (assoc(c) == 1 && prec(c) > prec(o[to - 1])) o[to++] = c;
             else {
                 while (to != 0 && o[to - 1] != ')' && prec(c) <= prec(o[to - 1]))
                     r[tr++] = o[--to];
