@@ -10,13 +10,13 @@ class Employee {
         System.out.println("Class: Employee");
     }
     public void calcSalary() {
-        System.out.println("Salary of an employee: " + 10000);
+        System.out.println("Salary of an employee: INR " + 10000);
     }
 }
 
 final class Engineer extends Employee {
     public void calcSalary() {
-        System.out.println("Salary of an engineer: " + 20000);
+        System.out.println("Salary of an engineer: INR " + 20000);
         super.calcSalary();
     }
 }
