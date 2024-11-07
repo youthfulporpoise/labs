@@ -3,50 +3,13 @@ import java.util.Scanner;
 
 class Main_30 {
     public static void main(String[] args) {
-        Scanner kb = new Scanner(System.in);
-        kb.useDelimiter("\n");
-
-        System.out.print("Number of managers: ");
-        int managerNumber = kb.nextInt();
-        Manager[] managers = new Manager[managerNumber];
-        for (int i = 0; i < managerNumber; i++) {
-            System.out.println("\nManager #" + (i + 1) + ":");
-            System.out.print("Name: "); String name = kb.next();
-            System.out.print("Age: "); int age = kb.nextInt();
-            System.out.print("Phone number: "); int phoneNumber = kb.nextInt();
-            System.out.print("Address: "); String address = kb.next();
-            System.out.print("Salary: "); double salary = kb.nextDouble();
-            System.out.print("Department: "); String dept = kb.next();
-            System.out.print("Specialization: "); String spec = kb.next();
-            managers[i] = new Manager(name, age, phoneNumber, address, salary,
-                                      dept, spec);
-        }
-        System.out.print("\nNumber of officers: ");
-        int officerNumber = kb.nextInt();
-        Officer[] officers = new Officer[officerNumber];
-        for (int i = 0; i < officerNumber; i++) {
-            System.out.println("\nOfficer #" + (i + 1));
-            System.out.print("Name: "); String name = kb.next();
-            System.out.print("Age: "); int age = kb.nextInt();
-            System.out.print("Phone number: "); int phoneNumber = kb.nextInt();
-            System.out.print("Address: "); String address = kb.next();
-            System.out.print("Salary: "); double salary = kb.nextDouble();
-            System.out.print("Department: "); String dept = kb.next();
-            System.out.print("Specialization: "); String spec = kb.next();
-            officers[i] = new Officer(name, age, phoneNumber, address, salary,
-                                      dept, spec);
-        }
-
-        if (managerNumber != 0 ) {
-            System.out.println("\nMANAGERS: ");
-            for (Manager m : managers) System.out.println("" + m + "\n");
-        }
-        if (officerNumber != 0) {
-            System.out.println("\nOFFICERS: ");
-            for (Officer o : officers) System.out.println("" + o + "\n");
-        }
+        Employee officer = new Officer("Rahul", 27, 0, "Breach Candy, Mumbai", 20000,
+                                       "Advertisement", "Copywriter");
+        Employee manager = new Manager("Vidya", 38, 0, "Greater Kailash, Delhi",
+                                        56000, "Advertisement", "Art Director");
+        System.out.println("MANAGER\n" + manager);
+        System.out.println("\nOFFICER\n" + officer);
     }
-
 }
 
 class Employee {
