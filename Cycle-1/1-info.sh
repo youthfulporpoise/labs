@@ -1,7 +1,15 @@
 #! /bin/bash
+OS="$(uname -s)"
 
 # Print real name and login name.
-printf 'Name:         %s (logged in as: %s)\n' "$(id -F)" "$(whoami)"
+case $OS in
+  Darwin)
+    printf 'Name:         %s (logged in as: %s)\n' "$(id -F)" "$(whoami)"
+    ;;
+  Linux)
+    printf 'Name:         %s\n' "$(whoami)"
+    ;;
+esac
 
 # Print current shell.
 printf 'Shell:        %s\n' "$(echo "$SHELL" | grep -oE '[a-z]*$')"
