@@ -11,6 +11,7 @@ case $OS in
     ;;
   *)
     echo "not supported: $OS"
+    exit 1
     ;;
 esac
 
