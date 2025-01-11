@@ -3,22 +3,12 @@
 # First, check whether we have two arguments (two numbers) and only two.
 # To do that, we have to know whether the script was an argument to `bash` or
 # not.
-if [[ "$0" == 'bash' ]]; then
-  if [[ "$#" -ne 3 ]]; then
-    echo "Usage: $1 <number> <number>"
-    exit 0
-  else
-    n="$2"
-    m="$3"
-  fi
+if [[ "$#" -ne 2 ]]; then
+  echo "Usage: $0 <number> <number>"
+  exit 0
 else
-  if [[ "$#" -ne 2 ]]; then
-    echo "Usage: $0 <number> <number>"
-    exit 0
-  else
-    n="$1"
-    m="$2"
-  fi
+  n="$1"
+  m="$2"
 fi
 
 # Now we do arithmetic.
