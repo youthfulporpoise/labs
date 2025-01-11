@@ -16,7 +16,7 @@ printf 'OS type:      %s\n' "$(uname)"
 printf 'Current path: %s\n' "$PWD"
 
 # Print current logins.
-echo '\nCurrently logged in:'
+echo -e '\nCurrently logged in:'
 who
 
 # Print current $PATH setting.
