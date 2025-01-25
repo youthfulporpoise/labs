@@ -13,7 +13,7 @@ typedef struct {
 #define QS 32
 Process queue[QS];
 size_t r = 0, f = 0;
-enum { FULL, EMPTY, NEUTRAL } = EMPTY;
+enum { FULL, EMPTY, NEUTRAL } qs = EMPTY;
 
 void enqueue(Process x)
 {
@@ -34,11 +34,11 @@ Process dequeue()
 typedef struct {
     size_t id;
     unsigned start;
-    unsigned end;
+    unsigned stop;
 } Gantt;
 
 /* A Gantt chart of a certain size is provided to do with. */
-Gantt chart[64];
+Gantt chart[32];
 
 /* This is our sorting function. */
 void sort(Process *process, size_t n)
@@ -54,7 +54,86 @@ void sort(Process *process, size_t n)
     }
 }
 
-void fcfs(Process *process, size_t n)
+/* A binary maximum function. */
+unsigned max(unsigned a, unsigned b) { return a > b ? a : b; }
+
+/* This function produces a Gantt chart from a process table. */
+size_t fcfs(Process *process, size_t n)
 {
     sort(process, n);
+
+    for (size_t i = 0; i < n; ++i)
+        enqueue(process[i]);
+
+    size_t z = 0;
+    unsigned t = 0;
+    while (qs != EMPTY) {
+        Gantt c;
+        Process p = dequeue();
+        c.id = p.id;
+        c.start = max(t, p.at);
+        t += p.bt;
+        c.stop = t;
+        chart[z++] = c;
+    }
+    return z;
+}
+
+/* This function prints our Gantt chart. */
+void print_chart(char *msg, Gantt *chart, size_t n)
+{
+    printf("%s", msg);
+    size_t z;
+    for (z = 0; z < n; ++z) 
+        printf("%u  [ P%zu ]  ", chart[z].start, chart[z].id);
+    printf("%u\n", chart[z].stop);
+}
+
+/* This function prints a result table from a Gantt chart. */
+void print_table
+    (char *msg, Process *process, size_t n, Gantt *chart, size_t z)
+{
+    printf("%s", msg);
+    printf("ID       WT (ms)  TT (ms)  \n"
+           "········ ········ ········ \n");
+    /* These are waiting time and turn-around time. */
+    /* k-th is the turn-around Gantt element. */
+    unsigned wt, tt;
+    size_t k;
+    for (size_t i = 0; i < n; ++i) {
+        Process p = process[i];
+        k = 0;
+        tt = 0;
+        for (size_t j = 0; j < z; ++j)
+            if (p.id == chart[j].id)
+                tt = chart[k = j].stop;
+        wt = 0;
+        for (size_t j = 0; j <= k; ++j)
+            if (p.id != chart[j].id)
+                wt += chart[j].stop;
+        tt -= p.at;
+        printf("P%-7zu %8u %8u\n", p.id, wt, tt);
+    }
+    printf("···························\n");
+}
+
+int main()
+{
+    size_t n;
+    printf("Number of processes: ");
+    scanf("%zu", &n);
+
+    printf("ID    Arrival Time    Burst Time:\n");
+    Process process[n];
+    for (size_t i = 0; i < n; ++i) {
+        Process p;
+        scanf("%zu %u %u", &p.id, &p.at, &p.bt);
+        process[i] = p;
+    }
+
+    size_t z = fcfs(process, n);
+    print_chart("\nGANTT CHART\n", chart, z);
+    print_table("\nRESULT\n", process, n, chart, z);
+
+    return 0;
 }
