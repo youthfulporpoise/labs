@@ -54,9 +54,6 @@ void sort(Process *process, size_t n)
     }
 }
 
-/* A binary maximum function. */
-unsigned max(unsigned a, unsigned b) { return a > b ? a : b; }
-
 /* This function produces a Gantt chart from a process table. */
 size_t fcfs(Process *process, size_t n)
 {
@@ -70,9 +67,14 @@ size_t fcfs(Process *process, size_t n)
     while (qs != EMPTY) {
         Gantt c;
         Process p = dequeue();
+
+        if (p.at > t) t = p.at;
+
         c.id = p.id;
-        c.start = max(t, p.at);
+        c.start = t;
+
         t += p.bt;
+
         c.stop = t;
         chart[z++] = c;
     }
@@ -85,8 +87,8 @@ void print_chart(char *msg, Gantt *chart, size_t n)
     printf("%s", msg);
     size_t z;
     for (z = 0; z < n; ++z) 
-        printf("%u  [ P%zu ]  ", chart[z].start, chart[z].id);
-    printf("%u\n", chart[z].stop);
+        printf("%u  [ P%zu ]  %u  ", chart[z].start, chart[z].id, chart[z].stop);
+    puts("");
 }
 
 /* This function prints a result table from a Gantt chart. */
@@ -96,10 +98,13 @@ void print_table
     printf("%s", msg);
     printf("ID       WT (ms)  TT (ms)  \n"
            "········ ········ ········ \n");
+    /* The accumulators for waiting times and turn-around times. */
     /* These are waiting time and turn-around time. */
     /* k-th is the turn-around Gantt element. */
+    unsigned wtc = 0, ttc = 0;
     unsigned wt, tt;
     size_t k;
+
     for (size_t i = 0; i < n; ++i) {
         Process p = process[i];
         k = 0;
@@ -110,11 +115,17 @@ void print_table
         wt = 0;
         for (size_t j = 0; j <= k; ++j)
             if (p.id != chart[j].id)
-                wt += chart[j].stop;
+                wt += chart[j].stop - chart[j].start;
         tt -= p.at;
         printf("P%-7zu %8u %8u\n", p.id, wt, tt);
+
+        wtc += wt;
+        ttc += tt;
     }
-    printf("···························\n");
+    printf("········ ········ ········  \n");
+    printf("Avg.     %-8u %-8u \n",
+           wtc / (unsigned) n,
+           ttc / (unsigned) n);
 }
 
 int main()
