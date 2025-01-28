@@ -8,6 +8,9 @@ typedef struct {
     unsigned at; /* Arrival time */
     unsigned bt; /* Burst time */
 } Process;
+/* The valid process IDs of a nontrivial process can be any of 1, 2, ...
+ * The process ID zero is the trivial process (a null process or nothing
+ * process).  This ID must be reserved. */
 
 /* A queue of a certain size is provided to do with. */
 #define QS 32
@@ -30,17 +33,13 @@ Process dequeue()
     return x;
 }
 
-/* A Gantt element has an ID, starting time, and ending time. */
-typedef struct {
-    size_t id;
-    unsigned start;
-    unsigned stop;
-} Gantt;
 
 /* A Gantt chart of a certain size is provided to do with. */
+typedef size_t Gantt;
 Gantt chart[32];
 
 /* This is our sorting function. */
+/* Complexity: O(n)  O(n^2)  O(n^2) */
 void sort(Process *process, size_t n)
 {
     /* We are using insertion sort. */
@@ -54,78 +53,95 @@ void sort(Process *process, size_t n)
     }
 }
 
-/* This function produces a Gantt chart from a process table. */
+/* This function produces a Gantt chart from a process table.
+ * Note: The process table is consumed.  Ensure a copy if later needed. */
+/* Complexity: O(z) where z is total burst time. */
 size_t fcfs(Process *process, size_t n)
 {
     sort(process, n);
 
-    for (size_t i = 0; i < n; ++i)
-        enqueue(process[i]);
+    size_t z = 0;    /* The current chart element. */
+    size_t i = 0;    /* The current process from table. */
+    unsigned t = 0;  /* The current time. */
+    bool busy = false;
+    Process p;
 
-    size_t z = 0;
-    unsigned t = 0;
-    while (qs != EMPTY) {
-        Gantt c;
-        Process p = dequeue();
+    while (true) {
+        if (i < n && t == process[i].at)
+            enqueue(process[i++]);
 
-        if (p.at > t) t = p.at;
-
-        c.id = p.id;
-        c.start = t;
-
-        t += p.bt;
-
-        c.stop = t;
-        chart[z++] = c;
+        if (!busy) {
+            if (qs == EMPTY) {
+                if (i < n) {
+                    chart[z++] = 0;
+                    t++;
+                } else break;
+            } else {
+                p = dequeue();
+                busy = true;
+            }
+        } else {
+            chart[z++] = p.id;
+            t++;
+            p.bt--;
+            if (p.bt == 0) busy = false;
+        }
     }
+
     return z;
 }
 
 /* This function prints our Gantt chart. */
+/* Complexity: O(z) where z is the total burst time. */
 void print_chart(char *msg, Gantt *chart, size_t n)
 {
     printf("%s", msg);
-    size_t z;
-    for (z = 0; z < n; ++z) 
-        printf("%u  [ P%zu ]  %u  ", chart[z].start, chart[z].id, chart[z].stop);
+    for (size_t i = 0; i < n; ++i)
+        printf("%zu ", chart[i]);
     puts("");
+
+    /* The process being executed, initialized to the trivial process. */
+    Gantt ex = 0;
+    size_t t;
+    for (t = 0; t < n; ++t) {
+        if (ex == chart[t]) continue;
+        else {
+            if (chart[t] == 0)
+                printf("%zu  ", t);
+            else
+                printf("%zu  [ P%zu ]  ", t, chart[t]);
+            ex = chart[t];
+        }
+    } printf("%zu\n", t);
 }
 
 /* This function prints a result table from a Gantt chart. */
+/* Complexity: O(n z) */
 void print_table
     (char *msg, Process *process, size_t n, Gantt *chart, size_t z)
 {
     printf("%s", msg);
+
+    size_t wtc = 0, ttc = 0;
+    size_t wt = 0, tt = 0;
+    Process p;
+
     printf("ID       WT (ms)  TT (ms)  \n"
            "········ ········ ········ \n");
-    /* The accumulators for waiting times and turn-around times. */
-    /* These are waiting time and turn-around time. */
-    /* k-th is the turn-around Gantt element. */
-    unsigned wtc = 0, ttc = 0;
-    unsigned wt, tt;
-    size_t k;
-
-    for (size_t i = 0; i < n; ++i) {
-        Process p = process[i];
-        k = 0;
-        tt = 0;
-        for (size_t j = 0; j < z; ++j)
-            if (p.id == chart[j].id)
-                tt = chart[k = j].stop;
-        wt = 0;
-        for (size_t j = 0; j <= k; ++j)
-            if (p.id != chart[j].id)
-                wt += chart[j].stop - chart[j].start;
+    for (size_t i = 0; i < n; ++i, wt = 0, tt = 0) {
+        p = process[i];
+        for (size_t t = 0; t < z; ++t)
+            if (chart[t] == p.id) tt = t + 1;
+        for (size_t t = 0; t < tt; ++t)
+            if (chart[t] != p.id) wt++;
+        wt -= p.at;
         tt -= p.at;
-        printf("P%-7zu %8u %8u\n", p.id, wt, tt);
-
+        printf("P%-7zu %8zu %8zu\n", p.id, wt, tt);
         wtc += wt;
         ttc += tt;
     }
     printf("········ ········ ········  \n");
-    printf("Avg.     %-8u %-8u \n",
-           wtc / (unsigned) n,
-           ttc / (unsigned) n);
+    printf("Avg.     %8zu %8zu\n", wtc / n, ttc / n);
 }
 
 int main()
