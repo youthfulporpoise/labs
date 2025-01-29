@@ -131,9 +131,11 @@ void print_table
     for (size_t i = 0; i < n; ++i, wt = 0, tt = 0) {
         p = process[i];
         for (size_t t = 0; t < z; ++t)
-            if (chart[t] == p.id) tt = t + 1;
+            if (chart[t] == p.id)
+                tt = t + 1;
         for (size_t t = 0; t < tt; ++t)
-            if (chart[t] != p.id) wt++;
+            if (chart[t] != p.id)
+                wt++;
         wt -= p.at;
         tt -= p.at;
         printf("P%-7zu %8zu %8zu\n", p.id, wt, tt);
@@ -159,6 +161,7 @@ int main()
     }
 
     size_t z = fcfs(process, n);
+
     print_chart("\nGANTT CHART\n", chart, z);
     print_table("\nRESULT\n", process, n, chart, z);
 
