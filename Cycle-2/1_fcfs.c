@@ -67,28 +67,25 @@ size_t fcfs(Process *process, size_t n)
     Process p;
 
     while (true) {
-        if (i < n && t == process[i].at)
+        while (i < n && t == process[i].at)
             enqueue(process[i++]);
 
         if (!busy) {
             if (qs == EMPTY) {
-                if (i < n) {
-                    chart[z++] = 0;
-                    t++;
-                } else break;
+                if (i < n) chart[t++] = 0;
+                else break;
             } else {
                 p = dequeue();
                 busy = true;
             }
         } else {
-            chart[z++] = p.id;
-            t++;
+            chart[t++] = p.id;
             p.bt--;
             if (p.bt == 0) busy = false;
         }
     }
 
-    return z;
+    return t;
 }
 
 /* This function prints our Gantt chart. */
