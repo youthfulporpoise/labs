@@ -14,3 +14,6 @@ cycles and their corresponding programs.
    #. Basic ZIP archival
 #. Scheduling Algorithms
    #. First Come, First Serve (FCFS)
+   #. Shortest Job First (SJF)
+   #. Shortest Remaining Time (SRT)
+   #. Priority Scheduling
