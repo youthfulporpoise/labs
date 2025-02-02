@@ -77,6 +77,7 @@ size_t roundrobin(size_t quantum, Process *process, size_t n)
                 else break;
             } else {
                 p = dequeue();
+                q = quantum;
                 busy = true;
             }
         } else {
