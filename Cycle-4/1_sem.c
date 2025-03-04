@@ -16,16 +16,33 @@ long buffer[BUFFER_SIZE];
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 int empty = BUFFER_SIZE;
 
+/* The write-out to standard out is not guaranteed to be chronological.  The
+ * action count assists in keeping track the chronology. */
+size_t actionc = 0;
+size_t action()
+{
+    // pthread_mutex_lock(&mutex);
+    actionc++;
+    // pthread_mutex_unlock(&mutex);
+    return actionc;
+}
+
 /* P is the semaphore wait. */
 void P(int *s)
 {
+    while (*s <= 0);
+    pthread_mutex_lock(&mutex);
     --(*s);
+    pthread_mutex_unlock(&mutex);
 }
 
 /* V is the semaphore signal or post. */
 void V(int *s)
 {
+    while (*s >= BUFFER_SIZE);
+    pthread_mutex_lock(&mutex);
     ++(*s);
+    pthread_mutex_unlock(&mutex);
 }
 
 
@@ -34,18 +51,10 @@ void V(int *s)
  * calls the produce function. */
 void produce()
 {
-    pthread_mutex_lock(&mutex);
-
-    if (empty == 0) {
-        printf("The buffer is full.\n");
-        pthread_mutex_unlock(&mutex);
-        return;
-    }
     P(&empty);
     buffer[empty] = random();
-    printf("%ld produced.\n", buffer[empty]);
+    printf("%ld produced. [%zu]\n", buffer[empty], action());
 
-    pthread_mutex_unlock(&mutex);
     return;
 }
 
@@ -64,17 +73,9 @@ void *producer(void *arg)
  * consume function. */
 void consume()
 {
-    pthread_mutex_lock(&mutex);
-
-    if (empty == BUFFER_SIZE) {
-        printf("The buffer is empty.\n");
-        pthread_mutex_unlock(&mutex);
-        return;
-    }
-    printf("%ld consumed.\n", buffer[empty]);
     V(&empty);
+    printf("%ld consumed. [%zu]\n", buffer[empty - 1], action());
 
-    pthread_mutex_unlock(&mutex);
     return;
 }
 
