@@ -4,55 +4,105 @@
 
 #include<stdio.h>
 #include<stdlib.h>
+#include<sys/types.h>
+#include<sys/ipc.h>
+#include<unistd.h>
+#include<pthread.h>
 
+/* This is our shared buffer between producer and consumer threads. */
 #define BUFFER_SIZE 4
 long buffer[BUFFER_SIZE];
 
-int mutex = 1,
-    empty = BUFFER_SIZE;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+int empty = BUFFER_SIZE;
 
-int signal(int *s) { ++(*s); }
-int wait(int *s) { --(*s); }
+/* P is the semaphore wait. */
+void P(int *s)
+{
+    --(*s);
+}
 
-/* This function produces a random long integer. */
+/* V is the semaphore signal or post. */
+void V(int *s)
+{
+    ++(*s);
+}
+
+
+/* The produce function produces and writes a random integer to the shared
+ * buffer.  The producer function is a higher-level function that systematically
+ * calls the produce function. */
 void produce()
 {
-    if (mutex == 0) return;
-    else if (empty == 0) {
-        printf("\nThe buffer is full.\n");
+    pthread_mutex_lock(&mutex);
+
+    if (empty == 0) {
+        printf("The buffer is full.\n");
+        pthread_mutex_unlock(&mutex);
         return;
     }
-    wait(&mutex);
+    P(&empty);
     buffer[empty] = random();
     printf("%ld produced.\n", buffer[empty]);
-    wait(&empty);
-    signal(&mutex);
+
+    pthread_mutex_unlock(&mutex);
+    return;
 }
 
-/* This function consumes an entry from the buffer. */
+void *producer(void *arg)
+{
+    for (size_t i = 0; i < BUFFER_SIZE; ++i) {
+        produce();
+        usleep(23);
+    }
+    return NULL;
+}
+
+
+/* The consume function consumes an integer from the shared buffer.  The
+ * consumer function is a higher-level function that systematically calls the
+ * consume function. */
 void consume()
 {
-    if (mutex == 0) return;
-    else if (empty == BUFFER_SIZE) {
-        printf("\nThe buffer is empty.\n");
+    pthread_mutex_lock(&mutex);
+
+    if (empty == BUFFER_SIZE) {
+        printf("The buffer is empty.\n");
+        pthread_mutex_unlock(&mutex);
         return;
     }
-    wait(&mutex);
-    signal(&empty);
     printf("%ld consumed.\n", buffer[empty]);
-    signal(&mutex);
+    V(&empty);
+
+    pthread_mutex_unlock(&mutex);
+    return;
 }
+
+void *consumer(void *arg)
+{
+    for (size_t i = 0; i < BUFFER_SIZE; ++i) {
+        consume();
+        usleep(13);
+    }
+    return NULL;
+}
+
+/* The producer and consumer functions call their corresponding primitives as
+ * much times as the size of the shared buffer.  Therefore, the number produce
+ * and consume calls are adjusted by adjusting the size of the shared buffer.
+ * These two functions call their primitives with an interval.  The interval is
+ * prime-number long.  The produce and consume functions both have different
+ * intervals from each other that are prime. */
 
 int main(int argc, char **argv)
 {
-    produce();
-    produce();
-    consume();
-    produce();
-    consume();
-    consume();
-    produce();
-    consume();
+    pthread_t tp, tc;
 
+    pthread_create(&tp, NULL, &producer, NULL);
+    pthread_create(&tc, NULL, &consumer, NULL);
+
+    pthread_join(tp, NULL);
+    pthread_join(tc, NULL);
+    
     return 0;
 }
