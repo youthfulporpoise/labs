@@ -4,45 +4,49 @@
 
 #include<stdio.h>
 #include<stdlib.h>
-#include<sys/types.h>
-#include<sys/ipc.h>
 #include<unistd.h>
+#include<semaphore.h>
 #include<pthread.h>
 
-/* This is our shared buffer between producer and consumer threads. */
+/* This is our shared buffer between producer and consumer threads.  The shared
+ * buffer is a circular queue, accessible through enqueue and dequeue
+ * operations. */
 #define BUFFER_SIZE 4
 long buffer[BUFFER_SIZE];
+size_t r = 0, f = 0;
 
+void enqueue(long x)
+{
+    buffer[r] = x;
+    r = (r + 1) % BUFFER_SIZE;
+}
+
+long dequeue()
+{
+    long x = buffer[f];
+    f = (f + 1) % BUFFER_SIZE;
+    return x;
+}
+
+long peek() { return buffer[f]; }
+
+/* The semaphore reference associated with our shared buffer. */
+sem_t *sem;
+
+/* The mutex lock associated with the action chronology counter. */
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-int empty = BUFFER_SIZE;
+
 
 /* The write-out to standard out is not guaranteed to be chronological.  The
- * action count assists in keeping track the chronology. */
+ * action count assists in keeping track the chronology.  Each action increment
+ * is mutually exclusive. */
 size_t actionc = 0;
 size_t action()
 {
-    // pthread_mutex_lock(&mutex);
+    pthread_mutex_lock(&mutex);
     actionc++;
-    // pthread_mutex_unlock(&mutex);
+    pthread_mutex_unlock(&mutex);
     return actionc;
-}
-
-/* P is the semaphore wait. */
-void P(int *s)
-{
-    while (*s <= 0);
-    pthread_mutex_lock(&mutex);
-    --(*s);
-    pthread_mutex_unlock(&mutex);
-}
-
-/* V is the semaphore signal or post. */
-void V(int *s)
-{
-    while (*s >= BUFFER_SIZE);
-    pthread_mutex_lock(&mutex);
-    ++(*s);
-    pthread_mutex_unlock(&mutex);
 }
 
 
@@ -51,9 +55,11 @@ void V(int *s)
  * calls the produce function. */
 void produce()
 {
-    P(&empty);
-    buffer[empty] = random();
-    printf("%ld produced. [%zu]\n", buffer[empty], action());
+    sem = sem_open("buffer", 0);
+    enqueue(random());
+    printf("%ld produced. [%zu]\n", peek(), action());
+    if (sem_post(sem) < 0)
+        perror("sem_post");
 
     return;
 }
@@ -62,7 +68,7 @@ void *producer(void *arg)
 {
     for (size_t i = 0; i < BUFFER_SIZE; ++i) {
         produce();
-        usleep(23);
+        usleep(13);
     }
     return NULL;
 }
@@ -73,8 +79,10 @@ void *producer(void *arg)
  * consume function. */
 void consume()
 {
-    V(&empty);
-    printf("%ld consumed. [%zu]\n", buffer[empty - 1], action());
+    sem = sem_open("buffer", 0);
+    if (sem_wait(sem) < 0)
+        perror("sem_wait");
+    printf("%ld consumed. [%zu]\n", dequeue(), action());
 
     return;
 }
@@ -83,7 +91,7 @@ void *consumer(void *arg)
 {
     for (size_t i = 0; i < BUFFER_SIZE; ++i) {
         consume();
-        usleep(13);
+        usleep(43);
     }
     return NULL;
 }
@@ -98,12 +106,14 @@ void *consumer(void *arg)
 int main(int argc, char **argv)
 {
     pthread_t tp, tc;
+    sem_t *sem = sem_open("buffer", O_CREAT, 0644, 0);
 
-    pthread_create(&tp, NULL, &producer, NULL);
     pthread_create(&tc, NULL, &consumer, NULL);
+    pthread_create(&tp, NULL, &producer, NULL);
 
     pthread_join(tp, NULL);
     pthread_join(tc, NULL);
     
+    sem_close(sem);
     return 0;
 }
