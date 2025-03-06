@@ -5,6 +5,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<unistd.h>
+#include<fcntl.h>
 #include<semaphore.h>
 #include<pthread.h>
 
@@ -28,7 +29,6 @@ long dequeue()
     return x;
 }
 
-long peek() { return buffer[f]; }
 
 /* The semaphore reference associated with our shared buffer. */
 sem_t *sem;
@@ -56,8 +56,9 @@ size_t action()
 void produce()
 {
     sem = sem_open("buffer", 0);
-    enqueue(random());
-    printf("%ld produced. [%zu]\n", peek(), action());
+    long x = random();
+    enqueue(x);
+    printf("%ld produced. [%zu]\n", x, action());
     if (sem_post(sem) < 0)
         perror("sem_post");
 
