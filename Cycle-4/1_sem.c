@@ -63,7 +63,7 @@ void *producer(void *arg)
 {
     for (size_t i = 0; i < 10; ++i) {
         produce();
-        usleep(433000);
+        usleep(400000);  /* 0.4 sec */
     }
     return NULL;
 }
@@ -92,7 +92,7 @@ void *consumer(void *arg)
 {
     for (size_t i = 0; i < 10; ++i) {
         consume();
-        usleep(733000);
+        usleep(700000);  /* 0.7 sec */
     }
     return NULL;
 }
