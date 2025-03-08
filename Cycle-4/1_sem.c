@@ -34,9 +34,6 @@ long dequeue()
 /* The semaphore reference associated with our shared buffer. */
 sem_t *empty, *full, *mutex;
 
-/* The mutex lock associated with the buffer queue. */
-// pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-
 
 /* The produce function produces and writes a random integer to the shared
  * buffer.  The producer function is a higher-level function that systematically
@@ -110,7 +107,7 @@ void sighandle(int sig)
     sem_close(empty);
     sem_close(mutex);
     puts("\nExiting ...");
-    exit(8);
+    exit(1);
 }
 
 int main(int argc, char **argv)
