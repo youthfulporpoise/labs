@@ -20,6 +20,7 @@ cycles and their corresponding programs.
    #. Shortest Job First (SJF)
    #. Shortest Remaining Time (SRT)
    #. Priority Scheduling
+   #. Round Robin (RR)
 
 #. Cycle 3: System Calls
 
