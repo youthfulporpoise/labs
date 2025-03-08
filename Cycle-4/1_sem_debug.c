@@ -43,15 +43,23 @@ sem_t *empty, *full, *mutex;
  * calls the produce function. */
 void produce(void)
 {
-    if (sem_wait(empty) < 0)
+    puts("Requesting entry: PRODUCE");
+    if (sem_trywait(empty) < 0) {
         perror("produce: sem_wait");
-    if (sem_wait(mutex) < 0)
+        return;
+    }
+    puts("Request granted");
+    if (sem_trywait(mutex) < 0) {
         perror("mutex: sem_wait");
+        return;
+    }
+    puts("LOCK mutex");
 
     long x = random();
     enqueue(x);
     printf("%ld produced.\n", x);
 
+    puts("UNLOCK mutex");
     sem_post(mutex);
     if (sem_post(full) < 0)
         perror("produce: sem_post");
@@ -61,7 +69,11 @@ void produce(void)
 
 void *producer(void *arg)
 {
-    for (size_t i = 0; i < 10; ++i) {
+    // empty = sem_open("/empty", 0);
+    // full = sem_open("/full", 0);
+    // mutex = sem_open("/mutex", 0);
+
+    for (;;) {
         produce();
         usleep(433000);
     }
@@ -74,13 +86,21 @@ void *producer(void *arg)
  * consume function. */
 void consume(void)
 {
-    if (sem_wait(full) < 0)
-        perror("consume: sem_wait");
-    if (sem_wait(mutex) < 0)
+    puts("Requesting entry: CONSUME");
+    if (sem_trywait(full) < 0) {
+        perror("consume: produce");
+        return;
+    }
+    puts("Request granted");
+    if (sem_trywait(mutex) < 0) {
         perror("mutex: sem_wait");
+        return;
+    }
+    puts("LOCK mutex");
 
     printf("%ld consumed.\n", dequeue());
 
+    puts("UNLOCK mutex");
     sem_post(mutex);
     if (sem_post(empty) < 0)
         perror("consume: sem_wait");
@@ -90,7 +110,11 @@ void consume(void)
 
 void *consumer(void *arg)
 {
-    for (size_t i = 0; i < 10; ++i) {
+    // empty = sem_open("/empty", 0);
+    // full = sem_open("/full", 0);
+    // mutex = sem_open("/mutex", 0);
+
+    for (;;) {
         consume();
         usleep(733000);
     }
@@ -104,26 +128,27 @@ void *consumer(void *arg)
  * prime-number long.  The produce and consume functions both have different
  * intervals from each other that are prime. */
 
-void sighandle(int sig)
+void handler(int sg)
 {
-    sem_close(full);
     sem_close(empty);
+    sem_close(full);
     sem_close(mutex);
-    puts("\nExiting ...");
-    exit(8);
+    puts("\nKilling process ...");
+    exit(0);
 }
 
 int main(int argc, char **argv)
 {
-    signal(SIGINT, sighandle);
+    signal(SIGINT, handler);
 
     /* There is read-write for all. */
-    mode_t perm = S_IWUSR | S_IRUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+    mode_t prm = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
+    int flg = O_CREAT;
 
     /* The semaphore name must have a prefix virgule. */
-    empty = sem_open("/empty", O_CREAT, perm, BUFFER_SIZE);
-    full = sem_open("/full", O_CREAT, perm, 0);
-    mutex = sem_open("/mutex", O_CREAT, perm, 1);
+    full = sem_open("/full", flg, prm, 0);
+    empty = sem_open("/empty", flg, prm, BUFFER_SIZE);
+    mutex = sem_open("/mutex", flg, prm, 1);
 
     pthread_t tp, tc;
     pthread_create(&tp, NULL, &producer, NULL);
@@ -133,6 +158,8 @@ int main(int argc, char **argv)
         perror("pthread tp");
     if (pthread_join(tc, NULL) != 0)
         perror("pthread tc");
+
+    puts("EXECUTION COMPLETE");
     
     sem_close(empty);
     sem_close(full);
