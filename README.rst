@@ -29,6 +29,7 @@ cycles and their corresponding programs.
    #. File status (name; size; permissions; timestamps)
    #. Listing directory and FS entry identification
 
-#. Cycle 4: Synchronization
+#. Cycle 4: Memory and Synchronization
 
    #. Bounded buffer problem using semaphores
+   #. IPC using shared memory and semaphores
