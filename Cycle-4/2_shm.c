@@ -18,7 +18,7 @@ sem_t *mutex, *avail;
 #define BUFFER_SIZE 1024
 char *buffer;
 int prot = PROT_READ | PROT_WRITE;
-int flag = MAP_ANON | MAP_SHARED;
+int flag = MAP_ANONYMOUS | MAP_SHARED;
 
 
 void sighandler(int sig)
@@ -35,7 +35,7 @@ int main(void)
 {
     signal(SIGINT, sighandler);
 
-    mmap(buffer, BUFFER_SIZE, prot, flag, 0, 0);
+    buffer = mmap(NULL, BUFFER_SIZE, prot, flag, -1, 0);
     mutex = sem_open("/mutex", O_CREAT, 0644, 1);
     avail = sem_open("/avail", O_CREAT, 0644, 0);
 
@@ -48,15 +48,12 @@ int main(void)
             perror("mutex");
 
         puts("WRITE:");
-        scanf("%s", buffer);
-        printf("\nWritten %zu bytes to shared memory.", strlen(buffer));
+        scanf("%[^\n]", buffer);
+        printf("\nWritten %zu bytes to shared memory.\n", strlen(buffer));
 
         if (sem_post(avail) < 0)
             perror("avail: post");
         sem_post(mutex);
-
-        sem_unlink("/avail");
-        sem_unlink("/mutex");
         return 0;
     } else {
         mutex = sem_open("/mutex", 0);
@@ -67,7 +64,7 @@ int main(void)
         if (sem_wait(mutex) < 0)
             perror("mutex");
 
-        puts("READ");
+        puts("\nREAD");
         printf("%s\n", buffer);
         sem_post(mutex);
 
