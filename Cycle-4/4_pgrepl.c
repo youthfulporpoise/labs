@@ -10,12 +10,13 @@
 #include <stdbool.h>
 
 
-bool loaded(ssize_t *pgfrm, size_t n, size_t x)
+size_t loaded(ssize_t *pgfrm, size_t n, size_t x)
 {
-    for (size_t i = 0; i < n; ++i)
+    size_t i;
+    for (i = 0; i < n; ++i)
         if (pgfrm[i] == x)
-            return true;
-    return false;
+            return i;
+    return i;
 }
 
 
@@ -24,22 +25,58 @@ void fifo_replace(size_t *refstr, size_t n, size_t frmc)
     ssize_t pgfrm[frmc];
     size_t w = 0;  /* i is the index of the oldest frame */
 
-    /* Initialize the frames to load the first three pages */
+    /* Initialize the frames to load nothing */
     for (size_t i = 0; i < frmc; ++i)
         pgfrm[i] = -1;
 
     /* Read through the reference string. */
     puts("FIRST-IN FIRST-OUT REPLACEMENT");
     for (size_t i = 0; i < n; ++i) {
-        if (!loaded(pgfrm, frmc, refstr[i])) {
+        if (loaded(pgfrm, frmc, refstr[i]) >= frmc) {
             pgfrm[w] = refstr[i];
             w = (w + 1) % frmc;
         }
         printf("%3zu: ", refstr[i]);
-        for (size_t j = 0; j < frmc && pgfrm[j] >= 0; ++j) {
+        for (size_t j = 0; j < frmc && pgfrm[j] >= 0; ++j)
             printf("%3zu ", pgfrm[j]);
-        } puts("");
+        puts("");
     }
+    puts("");
+}
+
+
+void lru_replace(size_t *refstr, size_t n, size_t frmc)
+{
+    /* pgfrm is a stack. */
+    ssize_t pgfrm[frmc];
+    size_t w = 0;
+
+    for (size_t i = 0; i < frmc; ++i)
+        pgfrm[i] = -1;
+
+    puts("LEAST-RECENTLY USED REPLACEMENT");
+    size_t z; /* the index of an already loaded page */
+    for (size_t i = 0; i < n; ++i) {
+        if (w < frmc)
+            pgfrm[w++] = refstr[i];
+        else {
+            z = loaded(pgfrm, w, refstr[i]);
+            size_t v;
+            if (z == frmc)
+                v = 0;
+            else
+                v = z;
+            while (v < w) {
+                pgfrm[v] = pgfrm[v + 1];
+                v++;
+            } pgfrm[w - 1] = refstr[i];
+        }
+        printf("%3zu: ", refstr[i]);
+        for (size_t j = 0; j < frmc && pgfrm[j] >= 0; ++j)
+            printf("%3zu ", pgfrm[j]);
+        puts("");
+    }
+    puts("");
 }
 
 
@@ -64,4 +101,5 @@ int main(void)
     puts("\n");
 
     fifo_replace(refstr, reqc, frmc);
+    lru_replace(refstr, reqc, frmc);
 }
