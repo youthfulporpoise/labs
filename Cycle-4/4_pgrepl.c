@@ -80,6 +80,44 @@ void lru_replace(size_t *refstr, size_t n, size_t frmc)
 }
 
 
+size_t min(ssize_t *a, size_t n)
+{
+    size_t m = 0;
+    for (size_t i = 0; i < n; ++i)
+        if (a[i] < a[m])
+            m = i;
+    return m;
+}
+
+void lfu_replace(size_t *refstr, size_t n, size_t frmc)
+{
+    ssize_t pgfrm[2][frmc];
+
+    for (size_t i = 0; i < frmc; ++i) {
+        pgfrm[0][i] = -1;
+        pgfrm[1][i] = -1;
+    }
+
+    puts("LEAST-FREQUENTLY USED REPLACEMENT");
+    size_t z; /* the index of the least frequently used */
+    for (size_t i = 0; i < n; ++i) {
+        z = loaded(pgfrm[0], frmc, refstr[i]);
+        if (z == frmc) {
+            z = min(pgfrm[1], frmc);
+            // printf("MIN: %zu\n", z);
+            pgfrm[0][z] = refstr[i];
+            pgfrm[1][z] = 1;
+        } else pgfrm[1][z]++;
+
+        printf("%3zu: ", refstr[i]);
+        for (size_t j = 0; j < frmc && pgfrm[0][j] >= 0; ++j)
+            printf("%3zu ", pgfrm[0][j]);
+        puts("");
+    }
+    puts("");
+}
+
+
 int main(void)
 {
     size_t frmc;
@@ -102,4 +140,7 @@ int main(void)
 
     fifo_replace(refstr, reqc, frmc);
     lru_replace(refstr, reqc, frmc);
+    lfu_replace(refstr, reqc, frmc);
+
+    return 0;
 }
