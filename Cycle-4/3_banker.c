@@ -30,7 +30,7 @@ int main(void)
     unsigned available[resc];
     puts("\nAVAILABLE:");
     for (size_t i = 0; i < resc; ++i)
-        scanf("%u", &available[resc]);
+        scanf("%u", &available[i]);
 
     unsigned need[prc][resc];
     for (size_t i = 0; i < prc; ++i)
@@ -47,58 +47,62 @@ int main(void)
 
     /* We simulate Banker’s algorithm to determine the safe state. */
     bool safe;            /* Is a safe state achievable? (false is a placeholder) */
-    bool none;            /* Are none of the processes terminable? */
     size_t safeseq[prc];  /* If so, what is the safe sequence? */
     size_t sf = 0;        /* The safe sequence index */
     bool finish[prc];     /* Which processes have succesfully terminated? */
 
-    size_t p;  /* ID of the requesting process in queue */
-    bool suff; /* Are resources sufficient for the process? */
-    while (true) {
-        for (p = 0; p < prc; ++p) {
-            /* The process has already terminted, skip. */
-            if (finish[p])
-                continue;
+    for (size_t i = 0; i < prc; ++i)
+        finish[i] = false;
 
-            /* Compare and determine whether the request can be granted. */
-            suff = true;
-            for (size_t i = 0; i < resc; ++i) {
-                if (need[p][i] > available[i]) {
-                    suff = false;
-                    finish[p] = false;
-                    break;
-                }
-            }
+    bool suff = false;
+    size_t p = 0;
+    while (p < prc) {
+        /* If already terminated, skip. */
+        if (finish[p]) {
+            p++;
+            continue;
+        }
 
-            /* If the request can be granted, terminate it and release the
-             * resources. */
-            if (suff) {
-                safeseq[sf++] = p;
-                for (size_t i = 0; i < resc; ++i) {
-                    available[i] += allocated[p][i];
-                    allocated[p][i] = 0;
-                }
-                finish[p] = true;
+        /* If the request can be granted, write safe sequence and terminate the
+         * process. */
+        suff = true;
+        for (size_t i = 0; i < resc; ++i) {
+            if (need[p][i] > maximum[p][i]) {
+                suff = false;
+                break;
+            } else if (need[p][i] > available[i]) {
+                suff = false;
+                break;
             }
         }
-        /* Determine whether the requests are completely, partially, or not
-         * satisfiable. */
-        safe = true;
-        none = false;
-        for (size_t i = 0; i < prc; ++i) {
-            safe &= finish[i];
-            none |= finish[i];
+        if (suff) {
+            safeseq[sf++] = p;
+            finish[p] = true;
+        } else {
+            p++;
+            continue;
         }
-        if (safe) break;
-        else if (none) continue;
+        
+        /* Release the acquired resources.  Enumerate the processes from the
+         * beginning afterwards. */
+        for (size_t i = 0; i < resc; ++i) {
+            available[i] += allocated[p][i];
+            allocated[p][i] = 0;
+        }
+        p = 0;
+        continue;
     }
+
+    safe = true;
+    for (size_t i = 0; i < prc; ++i)
+        safe &= finish[i];
 
     if (safe) {
         puts("A safe state is achievable.");
         printf("Safe sequence: ");
         for (size_t i = 0; i < prc; ++i)
             printf("P%-2zu ", safeseq[i]);
-        printf("\n");
+        puts("");
     } else {
         puts("A safe state is not achievable.");
     }
