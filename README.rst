@@ -33,3 +33,7 @@ cycles and their corresponding programs.
 
    #. Bounded buffer problem using semaphores
    #. IPC using shared memory and semaphores
+   #. Banker’s algorithm
+   #. Page replacement methods (FIFO; LRU; LFU)
+   #. Memory allocation schemes (first fit; best fit; worst fit)
+   #. Disk scheduling (FCFS; SCAN; C-SCAN)
