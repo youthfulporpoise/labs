@@ -6,7 +6,7 @@ cycles and their corresponding programs.
 
 #. Cycle 1: OS Concepts
 
-    #. First Come, First Serve (FCFS)
-    #. Shortest Job First (SJF) (Non-preemptive)
-    #. Round Robin (RR)
-    #. Priority (Preemptive)
+   #. First Come, First Serve (FCFS)
+   #. Shortest Job First (SJF) (Non-preemptive)
+   #. Round Robin (RR)
+   #. Priority (Preemptive)
