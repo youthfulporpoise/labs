@@ -1,36 +1,76 @@
 USE `23cs031`;
 
 -- CREATE TABLE employee (
+--     employee_id         INTEGER,
 --     employee_name       VARCHAR(36),
 --     street              VARCHAR(24),
---     city                VARCHAR(24)
+--     city                VARCHAR(24),
+--     PRIMARY KEY (employee_id)
 -- );
 -- 
 -- CREATE TABLE bank (
+--     bank_id             INTEGER,
 --     bank_name           VARCHAR(36),
---     city                VARCHAR(24)
+--     city                VARCHAR(24),
+--     PRIMARY KEY (bank_id)
 -- );
 -- 
 -- CREATE TABLE works (
---     employee_name       VARCHAR(36),
---     bank_name           VARCHAR(36),
---     salary              FLOAT
+--     employee_id         INTEGER,
+--     bank_id             INTEGER,
+--     salary              FLOAT,
+--     FOREIGN KEY (employee_id) REFERENCES employee(employee_id),
+--     FOREIGN KEY (bank_id) REFERENCES bank(bank_id)
 -- );
 -- 
 -- CREATE TABLE manages (
---     employee_name       VARCHAR(36),
---     manager_name        VARCHAR(36)
+--     employee_id       INTEGER,
+--     manager_id        INTEGER,
+--     FOREIGN KEY (manager_id) REFERENCES employee(employee_id),
+--     FOREIGN KEY (employee_id) REFERENCES employee(employee_id)
 -- );
 
 
-INSERT INTO employee VALUES
-    ("M. Harshvardhan",         "Breach Candy",         "Bombay"),
-    ("Mohammed Shah",           "Kamal Marg",           "Noida"),
-    ("Aisha Fathima",           "Edapally Jn",          "Edapally"),
-    ("G. H. Nair",              "Mangattu Rd",          "Ernakulam"),
-    ("Christina Jose",          "Theatre Rd",           "Kodungallur"),
-    ("Aliya Rahseed",           "Nethaji Rd",           "Pollachi"),
-    ("Selvi Ramakrishnan",      "Aruthra Nagar",        "Pondicherry"),
-    ("Sitara Jayakumar",        "English Church Rd",    "Palakkad")
-    ("Jennifer Thottathil",     "Double Cutting",       "Idukki"),
-    ("Aparna John",             "Anna Salai",           "Chennai");
+-- INSERT INTO employee VALUES
+--     ( 1,     "M. Harshvardhan",         "Breach Candy",         "Mumbai"),
+--     ( 2,     "Mohammed Shah",           "Kamal Marg",           "Noida"),
+--     ( 3,     "Aisha Fathima",           "Edapally Jn",          "Edapally"),
+--     ( 4,     "G. H. Nair",              "Mangattu Rd",          "Ernakulam"),
+--     ( 5,     "Christina Jose",          "Theatre Rd",           "Kodungallur"),
+--     ( 6,     "Aliya Rahseed",           "Nethaji Rd",           "Pollachi"),
+--     ( 7,     "Selvi Ramakrishnan",      "Aruthra Nagar",        "Pondicherry"),
+--     ( 8,     "Sitara Jayakumar",        "English Church Rd",    "Palakkad"),
+--     ( 9,     "Jennifer Thottathil",     "Double Cutting",       "Idukki"),
+--     (10,     "Aparna John",             "Anna Salai",           "Chennai");
+-- 
+-- 
+-- INSERT INTO bank VALUES
+--     (1,     "State Bank of India",         "Mumbai"),
+--     (2,     "Bank of Oman",                "Muscat"),
+--     (3,     "Indian Bank",                 "Chennai"),
+--     (4,     "HDFC Bank",                   "Mumbai"),
+--     (5,     "Federal Bank",                "Aluva");
+
+-- INSERT INTO works VALUES
+--     (1,      2,      200000),
+--     (2,      4,      300000),
+--     (3,      5,       80000),
+--     (4,      3,       60000),
+--     (5,      4,      120000),
+--     (6,      2,      140000),
+--     (7,      1,       70000),
+--     (8,      3,       80000),
+--     (9,      1,       80000),
+--     (10,     5,       90000);
+-- 
+-- INSERT INTO manages VALUES
+--     (1,     6),
+--     (2,     5),
+--     (3,     10),
+--     (4,     8),
+--     (5,     5),
+--     (6,     6),
+--     (7,     9),
+--     (8,     8),
+--     (9,     9),
+--     (10,    10);
