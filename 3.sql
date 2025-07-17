@@ -74,3 +74,36 @@ USE `23cs031`;
 --     (8,     8),
 --     (9,     9),
 --     (10,    10);
+
+-- (a) Find the names and cities of residence of all employees who work for Bank
+-- of Oman.
+-- SELECT e.employee_name, e.street, e.city, b.bank_name
+-- FROM employee e
+-- JOIN works w ON e.employee_id = w.employee_id
+-- JOIN bank b ON b.bank_id = w.bank_id
+-- WHERE b.bank_name = "Bank of Oman";
+
+-- (b) Find the names, street, addresses, and cities of residence of all
+-- employees who work for Indian Bank and earn more than INR 41,000.
+-- SELECT e.employee_name, e.street, e.city, b.bank_name
+-- FROM employee e
+-- JOIN works w ON e.employee_id = w.employee_id
+-- JOIN bank b ON b.bank_id = w.bank_id
+-- WHERE b.bank_name = "Indian Bank" AND
+--       w.salary > 41000;
+
+-- (c) Find all employees in the database who live in the sames cities as the
+-- banks for which they work.
+-- SELECT e.employee_name, b.bank_name, e.city, b.city
+-- FROM employee e
+-- JOIN works w ON e.employee_id = w.employee_id
+-- JOIN bank b ON b.bank_id = w.bank_id
+-- WHERE e.city = b.city;
+
+-- (d) Find all employees in the database that does not work in State Bank of
+-- India.
+-- SELECT e.employee_name, b.bank_name
+-- FROM employee e
+-- JOIN works w ON e.employee_id = w.employee_id
+-- JOIN bank b ON b.bank_id = w.bank_id
+-- WHERE b.bank_name <> "State Bank of India";
