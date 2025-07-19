@@ -107,3 +107,26 @@ USE `23cs031`;
 -- JOIN works w ON e.employee_id = w.employee_id
 -- JOIN bank b ON b.bank_id = w.bank_id
 -- WHERE b.bank_name <> "State Bank of India";
+
+-- (e) Find all employees in the database that earn more than every employee of
+-- Indian Bank.
+-- CREATE VIEW max_ib AS
+-- SELECT MAX(w.salary) AS max
+-- FROM works w
+-- JOIN bank b ON w.bank_id = b.bank_id
+-- WHERE bank_name = "Indian Bank"
+-- GROUP BY bank_name;
+-- 
+-- SELECT e.employee_name, w.salary, b.bank_name
+-- FROM employee e
+-- JOIN works w ON e.employee_id = w.employee_id
+-- JOIN bank b ON b.bank_id = w.bank_id
+-- JOIN max_ib m
+-- WHERE b.bank_name <> "Indian Bank" AND w.salary > m.max;
+
+-- (f) Find the number of employees working in each bank.
+SELECT b.bank_name, COUNT(b.bank_name) AS strength
+FROM bank b
+JOIN works w on b.bank_id = w.bank_id
+JOIN employee e ON e.employee_id = w.employee_id
+GROUP BY b.bank_name;
