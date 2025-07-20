@@ -79,7 +79,7 @@ int compar(const void *a, const void *b)
     else return 0;
 }
 
-size_t prty_sched(Process *process, size_t n)
+size_t schedule(Process *process, size_t n)
 {
     qsort(process, n, sizeof (Process), compar);
 
@@ -179,7 +179,7 @@ int main()
         process[i] = p;
     }
 
-    size_t z = prty_sched(process, n);
+    size_t z = schedule(process, n);
 
     print_chart("\nGANTT CHART\n", chart, z);
     print_table("\nRESULT\n", process, n, chart, z);

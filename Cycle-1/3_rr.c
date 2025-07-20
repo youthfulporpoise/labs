@@ -42,7 +42,7 @@ void sort(Process *process, size_t n)
     }
 }
 
-size_t roundrobin(Process *process, size_t n, size_t quantum)
+size_t schedule(Process *process, size_t n, size_t quantum)
 {
     sort(process, n);
 
@@ -150,7 +150,7 @@ int main()
     printf("Quantum: ");
     scanf("%zu", &quantum);
 
-    size_t z = roundrobin(process, n, quantum);
+    size_t z = schedule(process, n, quantum);
 
     print_chart("\nGANTT CHART\n", chart, z);
     print_table("\nRESULT\n", process, n, chart, z);

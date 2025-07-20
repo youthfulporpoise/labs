@@ -4,8 +4,8 @@
 
 typedef struct {
     ssize_t id;   
-    unsigned at;
-    unsigned bt; 
+    size_t at;
+    size_t bt; 
 } Process;
 
 #define QS 32
@@ -40,7 +40,7 @@ int compar(const void *a, const void *b)
     else return 0;
 }
 
-size_t fcfs(Process *process, size_t n)
+size_t schedule(Process *process, size_t n)
 {
     qsort(process, n, sizeof (Process), compar);
 
@@ -132,11 +132,11 @@ int main()
     Process process[n];
     for (size_t i = 0; i < n; ++i) {
         Process p;
-        scanf("%zu %u %u", &p.id, &p.at, &p.bt);
+        scanf("%zu %zu %zu", &p.id, &p.at, &p.bt);
         process[i] = p;
     }
 
-    size_t z = fcfs(process, n);
+    size_t z = schedule(process, n);
 
     print_chart("\nGANTT CHART\n", chart, z);
     print_table("\nRESULT\n", process, n, chart, z);
