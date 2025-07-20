@@ -30,21 +30,19 @@ Process dequeue()
 
 ssize_t chart[32];
 
-void sort(Process *process, size_t n)
+int compar(const void *a, const void *b)
 {
-    for (size_t i = 1; i < n; ++i) {
-        size_t j = i;
-        Process x = process[i];
-        while (j > 0 && x.at < process[j - 1].at) {
-            process[j] = process[j - 1];
-            --j;
-        } process[j] = x;
-    }
+    Process *x = (Process*) a,
+            *y = (Process*) b;
+
+    if (x->at < y->at) return -1;
+    else if (x->at > y->at) return 1;
+    else return 0;
 }
 
 size_t fcfs(Process *process, size_t n)
 {
-    sort(process, n);
+    qsort(process, n, sizeof (Process), compar);
 
     size_t z = 0;    /* The current chart element. */
     size_t i = 0;    /* The current process from table. */
