@@ -46,7 +46,7 @@ size_t schedule(Process *process, size_t n)
 
     size_t z = 0;    /* The current chart element. */
     size_t i = 0;    /* The current process from table. */
-    unsigned t = 0;  /* The current time. */
+    size_t t = 0;  /* The current time. */
     bool busy = false;
     Process p;
 

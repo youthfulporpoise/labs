@@ -4,8 +4,8 @@
 
 typedef struct {
     ssize_t id;   
-    unsigned at;
-    unsigned bt; 
+    size_t at;
+    size_t bt; 
 } Process;
 
 #define QS 32
@@ -48,7 +48,7 @@ size_t schedule(Process *process, size_t n, size_t quantum)
 
     size_t z = 0;    /* The current chart element. */
     size_t i = 0;    /* The current process from table. */
-    unsigned t = 0;  /* The current time. */
+    size_t t = 0;  /* The current time. */
     bool busy = false;
     size_t q = quantum; /* The time quantum counter */
     Process p;
@@ -142,7 +142,7 @@ int main()
     Process process[n];
     for (size_t i = 0; i < n; ++i) {
         Process p;
-        scanf("%zu %u %u", &p.id, &p.at, &p.bt);
+        scanf("%zu %zu %zu", &p.id, &p.at, &p.bt);
         process[i] = p;
     }
 
