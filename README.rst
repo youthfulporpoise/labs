@@ -6,7 +6,8 @@ cycles and their corresponding programs.
 
 #. Cycle 1: OS Concepts
 
-   #. First Come, First Serve (FCFS)
-   #. Shortest Job First (SJF) (Non-preemptive)
-   #. Round Robin (RR)
-   #. Priority (Preemptive)
+   #. CPU scheduling algorithms: FCFS; SJF; RR; Priority
+   #. Banker’s algorithm
+   #. Disk scheduling algorithms: FCFS; SCAN; FSCAN
+   #. Page replacement algorithms: FIFO; LRU; LFU
+   #. File allocation: Sequential; Indexed; Linked
