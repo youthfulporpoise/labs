@@ -45,7 +45,7 @@ void schedule(size_t *diskqueue, size_t n, size_t head, schedule_type st)
 
     switch (st) {
         case (FCFS):
-            for (i = 0; i < n; ++i)
+            for (i = 0; i < n + 1; ++i)
                 sq[j++] = dq[i];
             break;
 
