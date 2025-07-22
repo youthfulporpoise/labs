@@ -1,7 +1,3 @@
-/* QUESTION 3.
- * Write a C program to simulate Banker’s algorithm for deadlock avoidance.
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
