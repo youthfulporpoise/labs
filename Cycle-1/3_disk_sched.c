@@ -32,7 +32,7 @@ int compar(const void *a, const void *b)
 
 void schedule(size_t *diskqueue, size_t n, size_t head, schedule_type st)
 {
-    size_t schedqueue[2 * n];   /*  The disk queue after scheduling                 */
+    size_t sq[2 * n];           /*  The disk queue after scheduling                 */
     size_t tot_hdmov = 0;       /*  The total head movement                         */
     size_t i;                   /*  The current index of the disk queue             */
     size_t j = 0;               /*  The current index of the scheduling queue       */
@@ -46,7 +46,7 @@ void schedule(size_t *diskqueue, size_t n, size_t head, schedule_type st)
     switch (st) {
         case (FCFS):
             for (i = 0; i < n; ++i)
-                schedqueue[j++] = dq[i];
+                sq[j++] = dq[i];
             break;
 
         case (SCAN):
@@ -55,26 +55,26 @@ void schedule(size_t *diskqueue, size_t n, size_t head, schedule_type st)
 
             h = linear_search(dq, n + 1, head);
             for (i = h; i < n + 1; ++i)
-                schedqueue[j++] = dq[i];
-            schedqueue[j++] = DISKEND;
+                sq[j++] = dq[i];
+            sq[j++] = DISKEND;
             
             if (st == SCAN) {
                 for (i = h - 1; i < n; --i)
-                    schedqueue[j++] = dq[i];
+                    sq[j++] = dq[i];
             } else {
-                schedqueue[j++] = DISKSTART;
+                sq[j++] = DISKSTART;
                 for (i = 0; i < h; ++i)
-                    schedqueue[j++] = dq[i];
+                    sq[j++] = dq[i];
             }
             break;
     }
 
     printf("Schedule (%zu):", j);
     for (size_t k = 0; k < j - 1; ++k) {
-        printf("%4zu", schedqueue[k]);
-        tot_hdmov += dist(schedqueue[k], schedqueue[k + 1]);
+        printf("%4zu", sq[k]);
+        tot_hdmov += dist(sq[k], sq[k + 1]);
     }
-    printf("%4zu\n", schedqueue[j - 1]);
+    printf("%4zu\n", sq[j - 1]);
     printf("Total head movement: %4zu\n", tot_hdmov);
 }
 
