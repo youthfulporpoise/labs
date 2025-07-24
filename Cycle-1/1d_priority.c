@@ -9,13 +9,14 @@ typedef struct {
     size_t p;       /* Priority */
 } Process;
 
-#define QS 32
+#define         QS          32
+
 Process queue[QS];
 size_t r = 0, f = 0;
 enum { FULL, EMPTY, NEUTRAL } qs = EMPTY;
 
 Process __tmp__;
-#define SWAP(x, y) { __tmp__ = (x); (x) = (y); (y) = __tmp__; }
+#define     SWAP(x, y)      { __tmp__ = (x); (x) = (y); (y) = __tmp__; }
 
 void enqueue(Process x)
 {
@@ -115,7 +116,7 @@ size_t schedule(Process *process, size_t n)
     return t;
 }
 
-void print_chart(char *msg, size_t *chart, size_t n)
+void print_chart(char *msg, ssize_t *chart, size_t n)
 {
     printf("%s", msg);
     for (size_t i = 0; i < n; ++i)
