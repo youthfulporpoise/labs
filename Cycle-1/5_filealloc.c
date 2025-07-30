@@ -2,139 +2,108 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define     DIRSIZE     32
+#define     DIRSIZE     64
 
 typedef     enum { SEQN, INDX, LINK }       alloc_type;
-
 typedef struct {
-    char name[64];
-    alloc_type type;
-    size_t blocks[32],
-           blkc;
+    char name[64];                  /*  Filename                */
+    alloc_type type;                /*  File allocation type    */
+    size_t n;                       /*  Number of blocks        */
+    size_t blocks[DIRSIZE];         /*  Blocks                  */
 } file;
 
 file directory[DIRSIZE];
-bool mem[DIRSIZE];
+bool memory[DIRSIZE];
+
+/*  Allocate the i-th block as b for a file f.  */
+void allocate(file *f, size_t *blocks, size_t blockc)
+{
+    size_t block;
+    for (size_t i = 0; i < blockc; ++i) {
+        block = blocks[i];
+        if (memory[block])
+            printf("`%s` could not be fully allocated.\n", f->name);
+        else {
+            f->blocks[i] = block;
+            memory[block] = true;
+        }
+    } f->n = blockc;
+}
 
 void print_file(file f)
 {
-    printf("%s\t", f.name);
+    printf("%-16s ", f.name);
     switch (f.type) {
         case SEQN:
-            for (size_t i = 0; i < f.blkc; ++i)
+            for (size_t i = 0; i < f.n; ++i)
                 printf("%3zu ", f.blocks[i]);
-            puts("");
             break;
-
         case INDX:
             printf("%3zu\t[ ", f.blocks[0]);
-            for (size_t i = 1; i < f.blkc; ++i)
+            for (size_t i = 1; i < f.n; ++i)
                 printf("%3zu ", f.blocks[i]);
-            puts(" ]");
+            printf("] ");
             break;
-
         case LINK:
             printf("%3zu ", f.blocks[0]);
-            for (size_t i = 1; i < f.blkc; ++i)
+            for (size_t i = 1; i < f.n; ++i)
                 printf(" --> %3zu ", f.blocks[i]);
-            puts("");
             break;
-    }
-}
-
-void clrbuff()
-{
-    int c;
-    while ((c = getchar()) != '\n' && c != EOF);
+    } puts("");
 }
 
 int main(int argc, char **argv)
 {
-    size_t filec;
+    size_t filec, type;
     printf("The number of files for allocation\n> ");
     scanf("%zu", &filec);
 
-    char type;
-    size_t start,               /*  The start of an allocation          */
-           length,              /*  The allocation length in SEQN       */
-           blkc,                /*  The block count                     */
-           blk;                 /*  The current block holder            */
-
-    for (size_t i = 0; i < DIRSIZE; ++i)
-        mem[i] = false;
+    size_t blocks[DIRSIZE],         /*  The blocks for allocation               */
+           blockc,                  /*  The number of blocks for allocation     */
+           start;                   /*  The start or index block                */
 
     for (size_t i = 0; i < filec; ++i) {
-        puts(""); clrbuff();
-
-        printf("Filename\n> ");
-        scanf(" %s", directory[i].name);
-        printf("Allocation type (S, I, L)\n> ");
-        scanf(" %c", &type);
+        printf("\nFilename\n> ");
+        scanf("%s", directory[i].name);
+        printf("Allocation type\t\t0 - Seqn, 1 - Indx, 2 - Link\n> ");
+        scanf("%zu", &type);
 
         switch (type) {
-            case 'S':
+            case 0:
                 directory[i].type = SEQN;
-
                 printf("Start   Length\n> ");
-                scanf("%zu %zu", &start, &length);
-
-                for (size_t j = 0; j < length; ++j) {
-                    blk = start + j;
-                    if (mem[blk]) goto error;
-                    else mem[blk] = true;
-                    directory[i].blocks[j] = blk;
-                } directory[i].blkc = length;
+                scanf("%zu %zu", &start, &blockc);
+                for (size_t j = 0; j  < blockc; ++j)
+                    blocks[j] = start + j;
                 break;
 
-            case 'I':
+            case 1:
                 directory[i].type = INDX;
-
-                printf("Index block     Number of blocks\n> ");
-                scanf("%zu %zu", &blk, &blkc);
-                if (mem[blk]) goto error;
-                else mem[blk] = true;
-                directory[i].blocks[0] = blk;
-
-                printf("Blocks (%zu)\n> ", blkc);
-                for (size_t j = 1; j < blkc; ++j) {
-                    scanf("%zu", &blk);
-                    if (mem[blk]) goto error;
-                    else mem[blk] = true;
-                    directory[i].blocks[j] = blk;
-                }
-                directory[i].blkc = blkc;
+                printf("Index block         Number of blocks\n> ");
+                scanf("%zu %zu", &start, &blockc);
+                blocks[0] = start;
+                printf("Blocks\n> ");
+                for (size_t j = 1; j <= blockc; ++j)
+                    scanf("%zu", &blocks[j]);
+                blockc++;
                 break;
 
-            case 'L':
+            case 2:
                 directory[i].type = LINK;
-
-                printf("Number of blocks\n> ");
-                scanf("%zu", &blkc);
-
-                printf("Blocks\n> ");
-                for (size_t j = 0; j < blkc; ++j) {
-                    scanf("%zu", &blk);
-                    if (mem[j]) goto error;
-                    else mem[j] = true;
-                    directory[i].blocks[j] = blk;
-                }
-                directory[i].blkc = blkc;
+                printf("Number of blocks        Blocks\n> ");
+                scanf("%zu", &blockc);
+                for (size_t j = 0; j < blockc; ++j)
+                    scanf("%zu", &blocks[j]);
                 break;
 
             default:
-                printf("%c: unknown allocation type\nSkipping . . .\n", type);
+                puts("The allocation method is invalid.");
                 continue;
         }
+        allocate(&directory[i], blocks, blockc);
+    } puts("");
 
-        continue;
-        error:
-            puts("This file cannot be fully allocated.");
-            continue;
-    }
-
-    puts("\nDirectory");
     for (size_t i = 0; i < filec; ++i)
         print_file(directory[i]);
-
     return 0;
 }
