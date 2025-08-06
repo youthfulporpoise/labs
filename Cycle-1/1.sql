@@ -1,0 +1,149 @@
+-- CREATE DATABASE `23cs031-1-1`;
+
+USE `23cs031-1-1`;
+
+-- CREATE TABLE College (
+--     college_code        INTEGER         PRIMARY KEY,
+--     college_name        VARCHAR(48),
+--     address             VARCHAR(64)
+-- );
+-- 
+-- CREATE TABLE Faculty (
+--     college_code        INTEGER,
+--     faculty_code        INTEGER         PRIMARY KEY,
+--     faculty_name        VARCHAR(48),
+--     qualification       VARCHAR(36),
+--     experience          INTEGER,
+--     department          VARCHAR(48),
+--     address             VARCHAR(64),
+--     FOREIGN KEY (college_code) REFERENCES College(college_code)
+-- );
+-- 
+-- INSERT INTO College VALUES
+--     (1,     "Indian Institute of Technology",               "Delhi 110016"),
+--     (2,     "National Institute of Technology",             "Tamil Nadu 620015"),
+--     (3,     "Birla Institute of Technology and Science",    "Rajasthan 333031"),
+--     (4,     "Vellore Institute of Technology",              "Tamil Nadu 632014"),
+--     (5,     "Indian Institute of Information Technology",   "Uttar Pradesh 211015");
+-- 
+-- INSERT INTO Faculty VALUES
+--     (1, 101, "Dr. Rajesh Kumar",        "B.Tech",    10,    "Computer Science",         "123, Sector 12, Dwarka, New Delhi 110075"),
+--     (1, 102, "Prof. Emma Watson",       "M.Tech",    5,     "Electrical Engineering",   "56, Greater Kailash, New Delhi 110048"),
+--     (1, 103, "Dr. Alan Turner",         "Ph.D.",     12,    "Mechanical Engineering",   "789, Rohini Sector 3, New Delhi 110085"),
+--     (1, 104, "Prof. Anita Sharma",      "M.Tech",    8,     "Civil Engineering",        "45, Punjabi Bagh, New Delhi 110026"),
+--     (2, 105, "Dr. James Smith",         "B.Tech",    8,     "Mechanical Engineering",   "11, Anna Nagar, Chennai, Tamil Nadu 600040"),
+--     (2, 106, "Prof. Priya Patel",       "M.Tech",    6,     "Civil Engineering",        "29, T. Nagar, Chennai, Tamil Nadu 600017"),
+--     (2, 107, "Dr. William Johnson",     "Ph.D.",     14,    "Electrical Engineering",   "134, Adyar, Chennai, Tamil Nadu 600020"),
+--     (2, 108, "Prof. Sarah Lee",         "B.Tech",    7,     "Computer Science",         "88, Besant Nagar, Chennai, Tamil Nadu 600090"),
+--     (3, 109, "Dr. Zhang Wei",           "Ph.D.",     12,    "Aerospace Engineering",    "123, Bikaner Colony, Jaipur, Rajasthan 302001"),
+--     (3, 110, "Prof. Maya Desai",        "B.Tech",    7,     "Electronics Engineering",  "37, Vaishali Nagar, Jaipur, Rajasthan 302021"),
+--     (3, 111, "Dr. Alexander Ivanov",    "M.Tech",    10,    "Chemical Engineering",     "56, C-Scheme, Jaipur, Rajasthan 302007"),
+--     (3, 112, "Prof. Jaya Rao",          "M.Tech",    9,     "Mechanical Engineering",   "89, Mansarovar, Jaipur, Rajasthan 302020"),
+--     (4, 113, "Dr. Michael Johnson",     "M.Tech",    15,    "Computer Science",         "12, OMR Road, VIT Campus, Vellore, Tamil Nadu 632014"),
+--     (4, 114, "Prof. Ayesha Khan",       "B.Tech",    9,     "Information Technology",   "32, Gandhi Nagar, Vellore, Tamil Nadu 632001"),
+--     (4, 115, "Dr. Isabella Martinez",   "Ph.D.",     18,    "Artificial Intelligence",  "15, Kotturpuram, Chennai, Tamil Nadu 600085"),
+--     (4, 116, "Prof. Ravi Kumar",        "M.Tech",    11,    "Software Engineering",     "21, Tidel Park, Chennai, Tamil Nadu 600100"),
+--     (5, 117, "Dr. John Davis",          "Ph.D.",     20,    "Biotechnology",            "10, Civil Lines, Allahabad, Uttar Pradesh 211001"),
+--     (5, 118, "Prof. Olivia Brown",      "M.Tech",    9,     "Biotechnology",            "234, Ashok Nagar, Allahabad, Uttar Pradesh 211003"),
+--     (5, 119, "Dr. Carlos Gonzalez",     "B.Tech",    15,    "Mechanical Engineering",   "3, Chakeri, Allahabad, Uttar Pradesh 211008"),
+--     (5, 120, "Prof. Li Wei",            "M.Tech",    8,     "Electrical Engineering",   "90, Civil Lines, Allahabad, Uttar Pradesh 211001");
+
+-- (a) List all faculty members of a specified college whose experience is
+-- greater than or equal to 10 years.
+-- SELECT f.faculty_name, f.experience, c.college_name
+-- FROM Faculty f
+-- JOIN College c on f.college_code = c.college_code
+-- WHERE f.experience >= 10 AND c.college_name = "Indian Institute of Technology";
+--
+-- +------------------+------------+--------------------------------+
+-- | faculty_name     | experience | college_name                   |
+-- +------------------+------------+--------------------------------+
+-- | Dr. Rajesh Kumar |         10 | Indian Institute of Technology |
+-- | Dr. Alan Turner  |         12 | Indian Institute of Technology |
+-- +------------------+------------+--------------------------------+
+-- 2 rows in set (0.00 sec)
+
+-- (b) List all faculty members of a specified college who have at least 10
+-- years of experience but do not have an M.Tech. degree.
+-- SELECT f.faculty_name, f.experience, f.qualification, c.college_name
+-- FROM Faculty f
+-- JOIN College c on f.college_code = c.college_code
+-- WHERE f.experience >= 10 AND f.qualification != "M.Tech";
+-- 
+-- +-----------------------+------------+---------------+--------------------------------------------+
+-- | faculty_name          | experience | qualification | college_name                               |
+-- +-----------------------+------------+---------------+--------------------------------------------+
+-- | Dr. Rajesh Kumar      |         10 | B.Tech        | Indian Institute of Technology             |
+-- | Dr. Alan Turner       |         12 | Ph.D.         | Indian Institute of Technology             |
+-- | Dr. William Johnson   |         14 | Ph.D.         | National Institute of Technology           |
+-- | Dr. Zhang Wei         |         12 | Ph.D.         | Birla Institute of Technology and Science  |
+-- | Dr. Isabella Martinez |         18 | Ph.D.         | Vellore Institute of Technology            |
+-- | Dr. John Davis        |         20 | Ph.D.         | Indian Institute of Information Technology |
+-- | Dr. Carlos Gonzalez   |         15 | B.Tech        | Indian Institute of Information Technology |
+-- +-----------------------+------------+---------------+--------------------------------------------+
+-- 7 rows in set (0.00 sec)
+
+-- (c) List the faculty members of a specified college, department-wise, in
+-- non-decreasing order of their seniority.
+-- SELECT f.college_code, f.department, f.qualification, f.experience, c.college_name
+-- FROM Faculty f
+-- JOIN College c ON f.college_code = c.college_code
+-- WHERE c.college_name = "Indian Institute of Technology"
+-- ORDER BY f.department ASC, f.qualification ASC, f.experience ASC;
+--
+-- +--------------+------------------------+---------------+------------+--------------------------------+
+-- | college_code | department             | qualification | experience | college_name                   |
+-- +--------------+------------------------+---------------+------------+--------------------------------+
+-- |            1 | Civil Engineering      | M.Tech        |          8 | Indian Institute of Technology |
+-- |            1 | Computer Science       | B.Tech        |         10 | Indian Institute of Technology |
+-- |            1 | Electrical Engineering | M.Tech        |          5 | Indian Institute of Technology |
+-- |            1 | Mechanical Engineering | Ph.D.         |         12 | Indian Institute of Technology |
+-- +--------------+------------------------+---------------+------------+--------------------------------+
+-- 4 rows in set (0.09 sec)
+
+-- (d) List the names of colleges having more than specified number of faculty
+-- members.
+-- SELECT c.college_name, COUNT(f.faculty_code) AS faculty_count
+-- FROM College c
+-- JOIN Faculty f ON f.college_code = c.college_code
+-- GROUP BY c.college_name HAVING faculty_count >= 5;
+--
+-- Empty set (0.00 sec)
+
+-- (e) List the names of colleges with the least and the most number of faculty
+-- members.
+-- CREATE VIEW faculty_count AS
+--     SELECT c.college_name, COUNT(f.faculty_code) AS count
+--     FROM College c
+--     JOIN Faculty f ON c.college_code = f.college_code
+--     GROUP BY c.college_name;
+-- 
+-- SELECT *, MIN(count) AS min FROM faculty_count
+-- GROUP BY college_name;
+-- 
+-- SELECT *, MIN(count) AS min FROM faculty_count
+-- GROUP BY college_name;
+--
+-- Query OK, 0 rows affected (0.17 sec)
+-- 
+-- +--------------------------------------------+-------+------+
+-- | college_name                               | count | min  |
+-- +--------------------------------------------+-------+------+
+-- | Indian Institute of Technology             |     4 |    4 |
+-- | National Institute of Technology           |     4 |    4 |
+-- | Birla Institute of Technology and Science  |     4 |    4 |
+-- | Vellore Institute of Technology            |     4 |    4 |
+-- | Indian Institute of Information Technology |     4 |    4 |
+-- +--------------------------------------------+-------+------+
+-- 5 rows in set (0.00 sec)
+-- 
+-- +--------------------------------------------+-------+------+
+-- | college_name                               | count | min  |
+-- +--------------------------------------------+-------+------+
+-- | Indian Institute of Technology             |     4 |    4 |
+-- | National Institute of Technology           |     4 |    4 |
+-- | Birla Institute of Technology and Science  |     4 |    4 |
+-- | Vellore Institute of Technology            |     4 |    4 |
+-- | Indian Institute of Information Technology |     4 |    4 |
+-- +--------------------------------------------+-------+------+
+-- 5 rows in set (0.00 sec)
