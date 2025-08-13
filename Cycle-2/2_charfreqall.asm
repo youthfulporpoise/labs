@@ -7,7 +7,6 @@ newline     DB          0xa
 
 section        .bss
 str1        resb        96
-chr         resb        1
 count       resb        1
 
 section         .text
@@ -25,7 +24,11 @@ _start:
     MOV     ecx,        str1
     MOV     edx,        100
     INT     0x80
-    MOV     byte [str1 + eax + 1],      0       ; o/p written to eax, null appended
+    MOV     byte [str1 + eax - 1],      0       ; o/p written to eax, null appended
+
+    ; SYS_READ stores into eax the number of character read plus one
+    ; because newline by return is also read.  The index of null would
+    ; therefore have to be (i - 1).
 
     ; initialize
     MOV     edi,        str1
@@ -52,8 +55,8 @@ _start:
 .next:
     ; ready count for print
     MOV     ebx,            ecx
-    ADD     ebx,            '0'                     ; convert to ASCII
-    MOV     byte [count],   bl
+    ADD     bl,             '0'                     ; convert to ASCII
+    MOV     [count],        bl
 
     ; print letter
     MOV     eax,        4
