@@ -42,12 +42,12 @@ _start:
     int     0x80
 
     ; initialize
-    mov     esl,        str1
+    mov     esi,        str1
     mov     dl,         [chr]
     mov     ecx,        0
 
 .loop1:
-    mov     al,         [esl]
+    mov     al,         [esi]
     cmp     al,         0
     je      .done
     cmp     al,         dl
@@ -55,7 +55,7 @@ _start:
     inc     ecx
 
 .skip:
-    inc     esl
+    inc     esi
     jmp     .loop1
 
 .done:
