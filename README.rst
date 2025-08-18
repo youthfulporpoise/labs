@@ -11,3 +11,12 @@ cycles and their corresponding programs.
    #. Disk scheduling algorithms: FCFS; SCAN; FSCAN
    #. Page replacement algorithms: FIFO; LRU; LFU
    #. File allocation: Sequential; Indexed; Linked
+
+#. Cycle 2: Netwide Assembler
+
+   #. Frequency of a specified character in a string
+   #. Frequency of each character in a string
+   #. String equality
+   #. String concatenation
+   #. Case-sensitive palindrome
+   #. Case-insensitive palindrome
