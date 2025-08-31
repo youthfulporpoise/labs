@@ -172,14 +172,14 @@ VALUES
 
 --  (a) List the names of all students are greater than 18 years of age and have
 --  opted for a B.Tech. course.
---  SELECT s.name, s.date_of_birth, c.name
---  FROM Student s
---  JOIN Enrollment e ON s.roll_no = e.roll_no
---  JOIN Course c ON c.course_id = e.course_id
---  WHERE
---      s.date_of_birth + INTERVAL 18 YEAR <= CURRENT_DATE
---      AND
---      c.name LIKE 'B.Tech.%';
+SELECT s.name, s.date_of_birth, c.name
+FROM Student s
+JOIN Enrollment e ON s.roll_no = e.roll_no
+JOIN Course c ON c.course_id = e.course_id
+WHERE
+    s.date_of_birth + INTERVAL 18 YEAR <= CURRENT_DATE
+    AND
+    c.name LIKE 'B.Tech.%';
 --  
 --  OUTPUT.
 --  +----------------+---------------+-------------------------------------+
@@ -196,14 +196,14 @@ VALUES
 
 --  (b) List the details of those courses the fee whereof is greater than that
 --  of a B.Tech. course.
---  SELECT c.course_id, c.name, c.fee
---  FROM Course c
---  JOIN (
---         SELECT MAX(fee) AS btech_fee
---         FROM Course
---         WHERE name LIKE 'B.Tech.%'
---       ) AS b
---  WHERE c.fee > b.btech_fee;
+SELECT c.course_id, c.name, c.fee
+FROM Course c
+JOIN (
+       SELECT MAX(fee) AS btech_fee
+       FROM Course
+       WHERE name LIKE 'B.Tech.%'
+     ) AS b
+WHERE c.fee > b.btech_fee;
 --  
 --  OUTPUT.
 --  +-----------+--------------------------------+--------+
@@ -221,12 +221,12 @@ VALUES
 --  8 rows in set (0.001 sec)
 
 --  (c) List the details of the students who have opted for more than 2 courses.
---  SELECT s.roll_no, s.name, COUNT(e.enrollment_id) AS enrollments
---  FROM Student s
---  JOIN Enrollment e ON s.roll_no = e.roll_no
---  JOIN Course c ON c.course_id = e.course_id
---  GROUP BY e.roll_no
---  HAVING enrollments > 1;
+SELECT s.roll_no, s.name, COUNT(e.enrollment_id) AS enrollments
+FROM Student s
+JOIN Enrollment e ON s.roll_no = e.roll_no
+JOIN Course c ON c.course_id = e.course_id
+GROUP BY e.roll_no
+HAVING enrollments > 1;
 --  
 --  OUTPUT.
 --  +---------+-----------------+-------------+
@@ -244,19 +244,19 @@ VALUES
 -- (d) List the details (viz. name; fee; duration) of:
 --      - the courses that have been opted by maximum number of students;
 --      - the courses that have been opted by minimum number of students.
---  DROP VIEW IF EXISTS StudentsEnrolled;
---  CREATE VIEW IF NOT EXISTS StudentsEnrolled AS
---      SELECT course_id, COUNT(enrollment_id) AS enroll_count
---      FROM Enrollment
---      GROUP BY course_id;
---  
---  SELECT c.name, c.fee, c.duration, se.enroll_count
---  FROM Course c
---  JOIN StudentsEnrolled se ON se.course_id = c.course_id
---  JOIN (
---          SELECT MAX(enroll_count) AS max
---          FROM StudentsEnrolled
---       ) mse ON mse.max = se.enroll_count;
+DROP VIEW IF EXISTS StudentsEnrolled;
+CREATE VIEW IF NOT EXISTS StudentsEnrolled AS
+    SELECT course_id, COUNT(enrollment_id) AS enroll_count
+    FROM Enrollment
+    GROUP BY course_id;
+
+SELECT c.name, c.fee, c.duration, se.enroll_count
+FROM Course c
+JOIN StudentsEnrolled se ON se.course_id = c.course_id
+JOIN (
+        SELECT MAX(enroll_count) AS max
+        FROM StudentsEnrolled
+     ) mse ON mse.max = se.enroll_count;
 --  
 --  OUTPUT.
 --  +----------------+-------+----------+--------------+
@@ -268,18 +268,18 @@ VALUES
 
 --  (e) List the details of the student(s) who have opted every course.
 --  DROP VIEW IF EXISTS CoursesEnrolled;
---  CREATE VIEW IF NOT EXISTS CoursesEnrolled AS
---      SELECT roll_no, COUNT(DISTINCT course_id) AS enroll_count
---      FROM Enrollment
---      GROUP BY roll_no;
---  
---  SELECT s.roll_no, s.name
---  FROM Student s
---  JOIN CoursesEnrolled ce ON ce.roll_no = s.roll_no
---  JOIN (
---          SELECT COUNT(course_id) AS total_course_count
---          FROM Course
---       ) AS tcc ON ce.enroll_count = tcc.total_course_count;
+CREATE VIEW IF NOT EXISTS CoursesEnrolled AS
+    SELECT roll_no, COUNT(DISTINCT course_id) AS enroll_count
+    FROM Enrollment
+    GROUP BY roll_no;
+
+SELECT s.roll_no, s.name
+FROM Student s
+JOIN CoursesEnrolled ce ON ce.roll_no = s.roll_no
+JOIN (
+        SELECT COUNT(course_id) AS total_course_count
+        FROM Course
+     ) AS tcc ON ce.enroll_count = tcc.total_course_count;
 --  
 --  OUTPUT.
 --  +---------+-------------+
