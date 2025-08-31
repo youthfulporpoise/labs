@@ -65,9 +65,9 @@ INSERT INTO Book VALUES
 (50,    'Randamoozham',                 'D.C. Books',           'M. T. Vasudevan Nair',         '2024-06-05',        '1984-01-01',        'reference');
 
 --  (a) List the total number of copies of each book in the library.
---  SELECT title, COUNT(accession_no) AS copies
---  FROM Book
---  GROUP BY title;
+SELECT title, COUNT(accession_no) AS copies
+FROM Book
+GROUP BY title;
 --  
 --  OUTPUT.
 --  +-------------------------+--------+
@@ -93,10 +93,10 @@ INSERT INTO Book VALUES
 --  16 rows in set (0.001 sec)
 
 --  (b) List the total number of reference copies for each book in the library.
---  SELECT title, COUNT(accession_no) AS copies, status
---  FROM Book
---  WHERE status = "reference"
---  GROUP BY title;
+SELECT title, COUNT(accession_no) AS copies, status
+FROM Book
+WHERE status = "reference"
+GROUP BY title;
 --  
 --  OUTPUT.
 --  +--------------+--------+-----------+
@@ -110,10 +110,10 @@ INSERT INTO Book VALUES
 --      - the total number of issued copies;
 --      - the number of copies currently available in the libray;
 --      - the number of reference copies.
---  SELECT title, status, COUNT(accession_no) AS copies
---  FROM Book
---  GROUP BY status, title
---  ORDER BY title ASC, status ASC;
+SELECT title, status, COUNT(accession_no) AS copies
+FROM Book
+GROUP BY status, title
+ORDER BY title ASC, status ASC;
 --
 --  OUTPUT.
 --  +-------------------------+------------------------+--------+
@@ -143,10 +143,10 @@ INSERT INTO Book VALUES
 
 --  (d) List the details of all books whose status is "cannot be issued"
 --  publisherwise.
---  SELECT accession_no, title, publisher, status
---  FROM Book
---  WHERE status = "cannot be issued"
---  ORDER BY publisher ASC;
+SELECT accession_no, title, publisher, status
+FROM Book
+WHERE status = "cannot be issued"
+ORDER BY publisher ASC;
 --  
 --  OUTPUT.
 --  +--------------+-----------+------------+------------------+
@@ -161,9 +161,9 @@ INSERT INTO Book VALUES
 
 --  (e) List the details of all books that are categorized as *new arrivals*
 --  (i.e. books purchased within the last 6 months).
---  SELECT accession_no, title, author, date_of_purchase
---  FROM Book
---  WHERE date_of_purchase + INTERVAL 6 MONTH > CURRENT_DATE;
+SELECT accession_no, title, author, date_of_purchase
+FROM Book
+WHERE date_of_purchase + INTERVAL 6 MONTH > CURRENT_DATE;
 --  
 --  OUTPUT.
 --  +--------------+-------------------------+---------------+------------------+
@@ -178,19 +178,19 @@ INSERT INTO Book VALUES
 --  (f) List the details of each *famous book*.  A book is considered famous if:
 --          (i) it was purchased within 20 year of its publishing;
 --          (ii) it has more than 4 total copies in the library.
---  DROP VIEW IF EXISTS Copies;
---  CREATE VIEW Copies AS
---      SELECT title, COUNT(accession_no) AS copies
---      FROM Book
---      GROUP BY title;
---  
---  SELECT DISTINCT b.title, b.author, b.date_of_publishing, c.copies
---  FROM Book b
---  JOIN Copies c ON b.title = c.title
---  WHERE
---      b.date_of_publishing + INTERVAL 20 YEAR > CURRENT_DATE 
---      AND
---      c.copies >= 4;
+DROP VIEW IF EXISTS Copies;
+CREATE VIEW Copies AS
+    SELECT title, COUNT(accession_no) AS copies
+    FROM Book
+    GROUP BY title;
+
+SELECT DISTINCT b.title, b.author, b.date_of_publishing, c.copies
+FROM Book b
+JOIN Copies c ON b.title = c.title
+WHERE
+    b.date_of_publishing + INTERVAL 20 YEAR > CURRENT_DATE 
+    AND
+    c.copies >= 4;
 --  
 --  OUTPUT.
 --  +-------------------------+----------------------------+--------------------+--------+
