@@ -190,13 +190,13 @@ WHERE accession_no IN (SELECT DISTINCT accession_no FROM Books_Issue);
 --  (a) List all the books that are due from students.  A book is considered due
 --  if it was issued more than 15 days ago and has not been returned yet.
 --
---  SELECT b.accession_no, b.title, b.status, bi.date_of_issue
---  FROM Book b
---  JOIN Books_Issue bi ON bi.accession_no = b.accession_no
---  WHERE
---    b.status = 'Issued'
---    AND
---    bi.date_of_issue + INTERVAL 15 DAY >= CURRENT_DATE;
+SELECT b.accession_no, b.title, b.status, bi.date_of_issue
+FROM Book b
+JOIN Books_Issue bi ON bi.accession_no = b.accession_no
+WHERE
+  b.status = 'Issued'
+  AND
+  bi.date_of_issue + INTERVAL 15 DAY >= CURRENT_DATE;
 --  
 --  OUTPUT.
 --  +--------------+-------------------------+--------+---------------+
@@ -221,9 +221,9 @@ WHERE accession_no IN (SELECT DISTINCT accession_no FROM Books_Issue);
 
 --  (b) List all members who cannot be issued any more books.
 --
---  SELECT m.member_id, m.name
---  FROM Member m
---  WHERE m.number_of_books_issued >= m.max_limit;
+SELECT m.member_id, m.name
+FROM Member m
+WHERE m.number_of_books_issued >= m.max_limit;
 --  
 --  OUTPUT.
 --  Empty set (0.000 sec)
@@ -232,29 +232,29 @@ WHERE accession_no IN (SELECT DISTINCT accession_no FROM Books_Issue);
 --        - that has been issued to maximum number of member;
 --        - that has been issued to minimum number of member.
 --
---  DROP VIEW IF EXISTS Issue;
---  CREATE VIEW IF NOT EXISTS Issue
---  AS
---    SELECT b.title, COUNT(b.accession_no) AS issue_count
---    FROM Book b
---    JOIN Books_Issue bi ON bi.accession_no = b.accession_no
---    GROUP BY b.title;
---  
---  SELECT DISTINCT b.title, i.issue_count
---  FROM Book b
---  JOIN Issue i ON i.title = b.title
---  JOIN (
---          SELECT MAX(issue_count) AS max
---          FROM Issue
---       ) AS mi ON mi.max = i.issue_count;
---  
---  SELECT DISTINCT b.title, i.issue_count
---  FROM Book b
---  JOIN Issue i ON i.title = b.title
---  JOIN (
---          SELECT MIN(issue_count) AS min
---          FROM Issue
---       ) AS mi ON mi.min = i.issue_count;
+DROP VIEW IF EXISTS Issue;
+CREATE VIEW IF NOT EXISTS Issue
+AS
+  SELECT b.title, COUNT(b.accession_no) AS issue_count
+  FROM Book b
+  JOIN Books_Issue bi ON bi.accession_no = b.accession_no
+  GROUP BY b.title;
+
+SELECT DISTINCT b.title, i.issue_count
+FROM Book b
+JOIN Issue i ON i.title = b.title
+JOIN (
+        SELECT MAX(issue_count) AS max
+        FROM Issue
+     ) AS mi ON mi.max = i.issue_count;
+
+SELECT DISTINCT b.title, i.issue_count
+FROM Book b
+JOIN Issue i ON i.title = b.title
+JOIN (
+        SELECT MIN(issue_count) AS min
+        FROM Issue
+     ) AS mi ON mi.min = i.issue_count;
 --  
 --  OUTPUT.
 --  +------------------------+-------------+
@@ -281,27 +281,27 @@ WHERE accession_no IN (SELECT DISTINCT accession_no FROM Books_Issue);
 --        - that has been issued to every member;
 --        - that has not been issued to any member.
 --
---  DROP VIEW IF EXISTS Member_Issue;
---  CREATE VIEW IF NOT EXISTS Member_Issue
---  AS
---    SELECT b.title, COUNT(bi.member_id) AS member_count
---    FROM Books_Issue bi
---    JOIN Book b ON b.accession_no = bi.accession_no
---    GROUP BY b.title;
---  
---  SELECT DISTINCT b.title, b.publisher, b.year
---  FROM Book b
---  JOIN Member_Issue mi ON mi.title = b.title
---  JOIN
---    ( SELECT COUNT(member_id) AS total_members FROM Member )
---    AS tm ON tm.total_members = mi.member_count;
---  
---  SELECT DISTINCT b.title, b.publisher, b.year
---  FROM Book b
---  WHERE b.title NOT IN
---    ( SELECT b.title FROM Book b
---      JOIN Books_Issue bi ON b.accession_no = bi.accession_no
---    );
+DROP VIEW IF EXISTS Member_Issue;
+CREATE VIEW IF NOT EXISTS Member_Issue
+AS
+  SELECT b.title, COUNT(bi.member_id) AS member_count
+  FROM Books_Issue bi
+  JOIN Book b ON b.accession_no = bi.accession_no
+  GROUP BY b.title;
+
+SELECT DISTINCT b.title, b.publisher, b.year
+FROM Book b
+JOIN Member_Issue mi ON mi.title = b.title
+JOIN
+  ( SELECT COUNT(member_id) AS total_members FROM Member )
+  AS tm ON tm.total_members = mi.member_count;
+
+SELECT DISTINCT b.title, b.publisher, b.year
+FROM Book b
+WHERE b.title NOT IN
+  ( SELECT b.title FROM Book b
+    JOIN Books_Issue bi ON b.accession_no = bi.accession_no
+  );
 --  
 --  OUTPUT.
 --  +------------------------+-------------------------+------+
