@@ -20,3 +20,11 @@ cycles and their corresponding programs.
    #. String concatenation
    #. Case-sensitive palindrome
    #. Case-insensitive palindrome
+   #. String reversal
+   #. Substring search
+   #. Alphabetic case toggle
+   #. Ever-or-odd checker
+   #. Sum and difference of two input integers
+   #. Factorial of an input integer
+   #. GCD: greatest common divisor
+   #. Sum of digits of an integer
