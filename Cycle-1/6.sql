@@ -324,10 +324,21 @@ VALUES
 
 --  (b) Print the details of the residents along with the number of companions
 --  for a specified period.
+--  DROP VIEW IF EXISTS `companion_count`;
+--  CREATE VIEW IF NOT EXISTS companion_count
+--  AS
+--    SELECT c.resident_id, COUNT(companion_id) AS count
+--    FROM companion c
+--    GROUP BY c.resident_id;
+--  
+--  SELECT r.resident_id, r.name, r.address, cc.count
+--  FROM resident r
+--  JOIN companion_count cc ON cc.resident_id = r.resident_id;
 
 --  (c) Print the details of the residents who reserved more than two a/c rooms
 --  in at least two different bookings.
-SELECT r.resident_id, r.name
-FROM resident r
-JOIN booking b ON b.resident_id = r.resident_id
-JOIN room o ON o.room_no = b.room_no
+SELECT b.resident_id, COUNT(o.room_no) AS ac_rooms
+FROM booking b
+JOIN room o ON b.room_no = o.room_no
+WHERE o.room_type = 'a/c'
+GROUP BY b.resident_id;
