@@ -386,6 +386,7 @@ USE `23cs031-6`;
 
 --  (c) Print the details of the residents who reserved more than two a/c rooms
 --  in at least two different bookings.
+--
 --  DROP VIEW IF EXISTS ac_rooms_booked;
 --  CREATE VIEW ac_rooms_booked
 --  AS
@@ -413,7 +414,29 @@ USE `23cs031-6`;
 --  (d) Print the details of the food item(s) ordered by maximum number of
 --  residents and the details of the food item(s) ordered b the minimum number
 --  of residents.
-SELECT fo.item_id, COUNT(fo.order_id) AS order_count
-FROM food_order fo
-GROUP BY fo.item_id;
-
+--
+--  DROP VIEW IF EXISTS `order_count`;
+--  CREATE VIEW `order_count`
+--  AS
+--    SELECT fo.item_id, COUNT(fo.order_id) AS order_count
+--    FROM food_order fo
+--    GROUP BY fo.item_id
+--    ORDER BY order_count DESC;
+--  
+--  SELECT f.item_id, f.name, oc.order_count
+--  FROM food f
+--  JOIN order_count oc ON oc.item_id = f.item_id
+--  JOIN ( SELECT MAX(order_count) AS max FROM order_count ) AS max
+--    ON oc.order_count = max.max;
+--  
+--  OUTPUT.
+--  +---------+----------------------+-------------+
+--  | item_id | name                 | order_count |
+--  +---------+----------------------+-------------+
+--  |       8 | Chicken Tikka        |           4 |
+--  |       7 | Paneer Butter Masala |           4 |
+--  |       6 | Masala Dosa          |           4 |
+--  |      14 | Pizza Margherita     |           4 |
+--  |       2 | Fish Curry Rice      |           4 |
+--  +---------+----------------------+-------------+
+--  5 rows in set (0.001 sec)
