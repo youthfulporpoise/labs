@@ -1,0 +1,64 @@
+TWO-PASS ASSEMBLER
+==================
+
+PASS 1
+------
+initialize LOCCTR
+while not END:
+    parse LABEL, OPCODE, OPERAND
+    if LABEL:
+        if SYMTAB has LABEL:
+            set error (duplicate)
+        else:
+            SYMTAB[LABEL] = LOCCTR
+    if OPCODE in OPTAB:
+        LOCCTR += instruction_length
+    elif OPCODE == WORD:
+        LOCCTR += 3
+    elif OPCODE == RESW:
+        LOCCTR += 3 * Operand
+    elif OPCODE == RESB:
+        LOCCTR += Operand
+    elif OPCODE == BYTE:
+        LOCCTR += length_of_byte_constant
+    else:
+        set error
+    write line (address, error) to intermediate file
+
+PASS 2
+------
+read each record from intermediate file
+for each statement:
+    if OPCODE in OPTAB:
+        generate object code using OPTAB and SYMTAB
+    elif OPCODE == BYTE or WORD:
+        generate data code
+    elif OPCODE == RESW or RESB:
+        no code generated
+    else:
+        report error
+write assembled object program records (header, text, end)
+
+ONE-PASS ASSEMBLER
+==================
+Initialize LOCCTR, SYMTAB, OPTAB
+for each input line:
+    Parse LABEL, OPCODE, OPERAND
+    if LABEL exists:
+        if LABEL is in SYMTAB:
+            report error
+        else:
+            insert LABEL with LOCCTR value
+            if forward reference list for LABEL:
+                patch addresses with LOCCTR
+    if OPCODE is valid:
+        if OPERAND is defined in SYMTAB:
+            use its value
+        else:
+            insert OPERAND as undefined in SYMTAB
+            add current address to forward reference list
+        generate object code
+        update LOCCTR
+    else if OPCODE is a directive:
+        process accordingly (update LOCCTR, allocate space, etc.)
+

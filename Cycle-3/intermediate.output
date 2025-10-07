@@ -1,0 +1,11 @@
+1000 LDA ONE
+1003         STA   TWO
+1006         COMP  TWO
+1009         JEQ   SCOPY
+1012 TIX TWELVE
+1015         JGT   SCOPY
+1018 1
+1021 2
+1024 how_are_you_bro_you_fine?
+1049 
+1073 12
