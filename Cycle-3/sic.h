@@ -39,7 +39,7 @@ char_int_map symtab;
 typedef struct {
   size_t start;
   size_t size;
-  char record[8][10];
+  char record[16][10];
 } text_record;
 
 
@@ -129,7 +129,8 @@ size_t count_tokens(char *str, size_t len, char delim)
 char *next_token(char **lref, char *delim)
 {
   char *tok;
-  while (*(tok = strsep(lref, delim)) == '\0');
+  // while (*(tok = strsep(lref, delim)) == '\0' || strlen(tok) == 0);
+  while (strlen(tok = strsep(lref, delim)) == 0);
   return tok;
 }
 
@@ -157,55 +158,51 @@ size_t parse_line_1(char *lref, size_t len, char **label, char **opcode, char **
 
   switch (tokc) {
     case 1:
-      while (*(*opcode = strsep(&lref, delim)) == '\0');
+      *opcode = next_token(&lref, delim);
       break;
     case 2:
-      while (*(*opcode = strsep(&lref, delim)) == '\0');
-      while (*(*operand = strsep(&lref, delim)) == '\0');
+      *opcode = next_token(&lref, delim);
+      *operand = next_token(&lref, delim);
       break;
     case 3:
-      while (*(*label = strsep(&lref, delim)) == '\0');
-      while (*(*opcode = strsep(&lref, delim)) == '\0');
-      while (*(*operand = strsep(&lref, delim)) == '\0');
+      *label = next_token(&lref, delim);
+      *opcode = next_token(&lref, delim);
+      *operand = next_token(&lref, delim);
       break;
   }
   return tokc;
 }
 
-/*  parse_line parses the line into the fields **label, **opcode, **operand,
- *  with respect to the number of tokens in the line.  The parsing proceeds in
- *  this manner:
- *
- *  +-------------+------------------------------------------------+
+/*  +-------------+------------------------------------------------+
  *  | token count | parse                                          |
  *  +-------------+------------------------------------------------+
  *  | 1           | label = #1     opcode = NULL  operand = NULL   |
- *  | 2           | label = #1     opcode = #2   operand = NULL    |
- *  | 3           | label = #1     opcode = #2   operand = #3      |
+ *  | 2           | label = #1     opcode = #2    operand = NULL   |
+ *  | 3           | label = #1     opcode = #2    operand = #3     |
  *  +-------------+------------------------------------------------+
  */
 
-size_t parse_line_2(char *lref, size_t len, char **label, char **opcode, char **operand)
+size_t parse_line_2(char *lref, size_t len, char **loc, char **opcode, char **operand)
 {
   size_t tokc = count_tokens(lref, len, ' ');
-  char delim[] = " \n\t";
+  char delim[] = " \t\n";
 
-  *label = NULL;
+  *loc = NULL;
   *opcode = NULL;
   *operand = NULL;
 
   switch (tokc) {
     case 1:
-      while (*(*label = strsep(&lref, delim)) == '\0');
+      *loc = next_token(&lref, delim);
       break;
     case 2:
-      while (*(*label = strsep(&lref, delim)) == '\0');
-      while (*(*opcode = strsep(&lref, delim)) == '\0');
+      *loc = next_token(&lref, delim);
+      *opcode = next_token(&lref, delim);
       break;
     case 3:
-      while (*(*label = strsep(&lref, delim)) == '\0');
-      while (*(*opcode = strsep(&lref, delim)) == '\0');
-      while (*(*operand = strsep(&lref, delim)) == '\0');
+      *loc = next_token(&lref, delim);
+      *opcode = next_token(&lref, delim);
+      *operand = next_token(&lref, delim);
       break;
   }
   return tokc;
@@ -218,17 +215,22 @@ size_t parse_line_2(char *lref, size_t len, char **label, char **opcode, char **
 void print_mapping(char_int_map map)
 {
   for (size_t i = 0; i < map.size; ++i)
-    printf("| %8s -> %04d\n", map.key[i], map.value[i]);
+    printf("%04X <- %-8s\n", map.value[i], map.key[i]);
 }
 
 /*  print the text record, including the carets for distinction, the starting
  *  address, and the length of the record.
  */
 
-void print_text_record(text_record tr)
+void print_text_record(text_record *tr)
 {
-  printf("T^%06zx^%02zx", tr.start, tr.size * 3);
-  for (size_t i = 0; i < tr.size; ++i)
-    printf("^%s", tr.record[i]);
+  if (tr->size == 0) return;
+
+  printf("T^%06zX^%02zX", tr->start, tr->size * 3);
+  for (size_t i = 0; i < tr->size; ++i)
+    printf("^%s", tr->record[i]);
   printf("\n");
+
+  tr->start += tr->size;
+  tr->size = 0;
 }

@@ -1,10 +1,12 @@
-        START 1000
-SCOPY   LDA   ONE
+SCOPY   START 1000
+        LDA   ONE
         STA   TWO
         COMP  TWO
         JEQ   SCOPY
 EXIT    TIX   TWELVE
         JGT   SCOPY
+        LDX   TWO
+        STX   ONE
 ONE     WORD  1
 TWO     WORD  2
 REPLY   RESB  24

@@ -17,9 +17,9 @@ int main(int argc, char **argv)
   char line_copy[256];
   char *label, *opcode, *operand;
 
-  unsigned length;
-  unsigned startaddr;
-  char *progname;
+  unsigned length = 0;
+  unsigned startaddr = 0;
+  char progname[16];
 
   char scratch[256];
   char *intermediate = calloc(1024, sizeof (char));
@@ -39,9 +39,10 @@ int main(int argc, char **argv)
       break;
 
     if (strcmp(opcode, "START") == 0) {
-      locctr = (unsigned) strtol(operand, NULL, 10);
+      locctr = (unsigned) strtol(operand, NULL, 16);
+      append(&symtab, label, locctr);
       startaddr = locctr;
-      progname = label;
+      strcpy(progname, label);
       continue;
     }
 
@@ -57,10 +58,10 @@ int main(int argc, char **argv)
       sprintf(line_copy, "%s\n", operand);
     else if (strcmp(opcode, "RESW") == 0 || strcmp(opcode, "RESB") == 0)
       sprintf(line_copy, "\n");
-    else if (tokc == 3)
+    else if (tokc == 3 || tokc == 2)
       sprintf(line_copy, "%s %s\n", opcode, operand);
 
-    sprintf(scratch, "%04zu %s", locctr, line_copy);
+    sprintf(scratch, "%04zX %s", locctr, line_copy);
 
     if (lookup(optab, opcode) >= 0)
       locctr += 3;
@@ -84,37 +85,52 @@ int main(int argc, char **argv)
 
   printf("%s\n", intermediate);
   print_mapping(symtab);
+  puts("");
 
-  text_record tr = { .start = 0, .size = 0 };
-  sprintf(output, "H^%s^%06x^%06x\n", progname, startaddr, length);
+  /* * * * * * * * */
+  /*    Pass 2.    */
+  /* * * * * * * * */
+
+  text_record tr = { .start = startaddr, .size = 0 };
+  printf("H^%s^%06x^%06x\n", progname, startaddr, length);
 
   while ((line = strsep(&intermediate, "\n")) != NULL) {
+    if (tr.size == 10) {
+      print_text_record(&tr);
+      continue;
+    }
+
+    label = NULL;
+    opcode = NULL;
+    operand = NULL;
     tokc = parse_line_2(line, strlen(line), &label, &opcode, &operand);
 
-    printf("%02zx%04zx", lookup(optab, opcode), lookup(symtab, operand));
-    if (tr.size == 10) {
-      tr.start += tr.size;
-      tr.size = 0;
-      print_text_record(tr);
-    }
-
-    switch (tokc) {
-      case 1:
-        sprintf(tr.record[tr.size], "^xxxxxx");
-        break;
-      case 2:
-        sprintf(tr.record[tr.size], "%06lx", strtol(operand, NULL, 10));
-        break;
-      case 3:
-        sprintf(tr.record[tr.size], "%02zx%04zx", lookup(optab, opcode),
-          lookup(symtab, operand));
-        break;
-    }
-    
-    sprintf(tr.record[tr.size], "%02zx%04zx",
-      lookup(optab, opcode), lookup(symtab, operand));
+    //  if (operand != NULL)
+    //    printf("%02X%04X\n",
+    //      optab.value[lookup(optab, opcode)],
+    //      symtab.value[lookup(symtab, operand)]
+    //    );
+    //  else if (opcode != NULL)
+    //    printf("%06lX\n",
+    //      strtol(opcode, NULL, 16)
+    //    );
+    //  else printf("XXXXXX\n");
+   
+    if (operand != NULL)
+      sprintf(tr.record[tr.size], "%02X%04X",
+        optab.value[lookup(optab, opcode)],
+        symtab.value[lookup(symtab, operand)]
+      );
+    else if (opcode != NULL)
+      sprintf(tr.record[tr.size], "%06lX",
+        strtol(opcode, NULL, 16)
+      );
+    else
+      sprintf(tr.record[tr.size], "xxxxxx");
     tr.size++;
   };
+  print_text_record(&tr);
+  printf("E^%X\n", startaddr);
 
   return 0;
 }
