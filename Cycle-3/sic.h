@@ -72,21 +72,6 @@ ssize_t lookup(char_int_map map, char *key)
   return -1;
 }
 
-/*  set_value is an convenient abstraction that could also be plausibly be done
- *  manually with lookup function.  It simply finds *key and sets val as the
- *  corresponding value.
- */
-
-ssize_t set_value(char_int_map map, char *key, int val)
-{
-  int i = lookup(map, key);
-  if (i < 0) return -1;
-  else {
-    map.value[i] = val;
-    return 0;
-  }
-}
-
 /*  append, as suggested by its name, adds an entry to end of the key-value
  *  mapping unless the maximum size allowed of the key-value is exceeded.
  */

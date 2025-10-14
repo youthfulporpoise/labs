@@ -50,8 +50,7 @@ int main(int argc, char **argv)
       if (lookup(symtab, label) >= 0) {
         printf("error: redefining label: %s\n", label);
         exit(10);
-      } else
-        append(&symtab, label, locctr);
+      } else append(&symtab, label, locctr);
     }
 
     if (strcmp(opcode, "WORD") == 0 || strcmp(opcode, "BYTE") == 0)
@@ -80,12 +79,13 @@ int main(int argc, char **argv)
 
     strcat(intermediate, scratch);
   }
+
   length = locctr - startaddr;
   fclose(file);
 
   printf("%s\n", intermediate);
   print_mapping(symtab);
-  puts("");
+  printf("\n");
 
   /* * * * * * * * */
   /*    Pass 2.    */
@@ -104,17 +104,6 @@ int main(int argc, char **argv)
     opcode = NULL;
     operand = NULL;
     tokc = parse_line_2(line, strlen(line), &label, &opcode, &operand);
-
-    //  if (operand != NULL)
-    //    printf("%02X%04X\n",
-    //      optab.value[lookup(optab, opcode)],
-    //      symtab.value[lookup(symtab, operand)]
-    //    );
-    //  else if (opcode != NULL)
-    //    printf("%06lX\n",
-    //      strtol(opcode, NULL, 16)
-    //    );
-    //  else printf("XXXXXX\n");
    
     if (operand != NULL)
       sprintf(tr.record[tr.size], "%02X%04X",
@@ -125,8 +114,8 @@ int main(int argc, char **argv)
       sprintf(tr.record[tr.size], "%06lX",
         strtol(opcode, NULL, 16)
       );
-    else
-      sprintf(tr.record[tr.size], "xxxxxx");
+    else continue;
+
     tr.size++;
   };
   print_text_record(&tr);
