@@ -28,3 +28,8 @@ cycles and their corresponding programs.
    #. Factorial of an input integer
    #. GCD: greatest common divisor
    #. Sum of digits of an integer
+
+#. Cycle 3: Assembler and Loader
+
+   #. Two-pass assembler
+   #. Absolute loader
