@@ -7,8 +7,11 @@ EXIT    TIX   TWELVE
         JGT   SCOPY
         LDX   TWO
         STX   ONE
+        ADD   EIGHT
+        SUB   SIXTY
 ONE     WORD  1
 TWO     WORD  2
-REPLY   RESB  24
+EIGHT   WORD  8
 TWELVE  WORD  12
+SIXTY   WORD  16
         END
