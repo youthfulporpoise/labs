@@ -2,124 +2,236 @@
 #include  <stdlib.h>
 #include  <stdbool.h>
 #include  <string.h>
-#include  "sic.h"
+
+#define   INTRMLEN    1024
+#define   SCRCHLEN    256
+#define   LINELEN     (32 * 3)
+#define   WORDLEN     32
+#define   OBJCTLEN    1024
+
+typedef struct {
+  char key[32][16];
+  long value[32];
+  size_t n;
+} char_int_map;
+
+char_int_map optab = {
+  .key = {
+    "ADD", "AND", "COMP", "DIV", "J", "JEQ", "JGT", "JLT", "JSUB", "LDA",
+    "LDCH", "LDL", "LDX", "MUL", "OR", "RD", "RSUB", "STA", "STCH", "STL",
+    "STX", "SUB", "TD", "TIX", "WD"
+  },
+  .value = {
+    0x18, 0x40, 0x28, 0x24, 0x3C, 0x30, 0x34, 0x38, 0x48, 0x00, 0x50, 0x08,
+    0x04, 0x20, 0x44, 0xD8, 0x4C, 0x0C, 0x54, 0x14, 0x10, 0x1C, 0xE0, 0x2C, 0xDC
+  },
+  .n = 24
+};
+
+char_int_map symtab = { .n = 0 };
+
+bool lookup(char *key, char_int_map map) {
+  for (size_t i = 0; i < map.n; i++)
+    if (strcmp(key, map.key[i]) == 0)
+      return true;
+  return false;
+}
+
+long getvalue(char *key, char_int_map map) {
+  for (size_t i = 0; i < map.n; i++)
+    if (strcmp(key, map.key[i]) == 0)
+      return map.value[i];
+  return -1;
+}
+
+char object[OBJCTLEN] = "\0",
+     txtrec[SCRCHLEN] = "\0",
+     tmp[SCRCHLEN];
+
+void write_hdr(char *prgname, unsigned long begaddr, unsigned long prglen)
+{
+  sprintf(tmp, "H^%s^%06lX^%06lX\n", prgname, begaddr, prglen);
+  strcat(object, tmp);
+}
+
+void write_txt(unsigned long begaddr, char *opcode, char *operand, bool forcewr)
+{
+  static size_t txtreccnt = 0;
+  static size_t txtreclen = 0;
+  static size_t recbegaddr;
+  static size_t recbegaddr_init = false;
+
+  if (!recbegaddr_init) {
+    recbegaddr = begaddr;
+    recbegaddr_init = true;
+  }
+
+  if (txtreccnt == 10 || forcewr) {
+    sprintf(tmp, "T^%06lX^%02lX%s\n", recbegaddr, txtreclen, txtrec);
+    strcat(object, tmp);
+
+    recbegaddr += txtreclen;
+    txtreccnt = 0;
+    txtreclen = 0;
+    sprintf(txtrec, "");
+    sprintf(tmp, "");
+  }
+
+  if (strcmp(opcode, "WORD") == 0)
+    sprintf(tmp, "^%06lX", strtol(operand, NULL, 10));
+  else if (strcmp(opcode, "RESB") == 0)
+    sprintf(tmp, "^xxxxxx");
+  else if (strcmp(opcode, "RESW") == 0)
+    sprintf(tmp, "^xxxxxx");
+  else
+    sprintf(tmp, "^%02lX%04lX",
+      getvalue(opcode, optab),
+      getvalue(operand, symtab)
+    );
+
+  strcat(txtrec, tmp);
+  txtreccnt++;
+  txtreclen += 6;
+}
+
+void write_end(unsigned long begaddr)
+{
+  sprintf(tmp, "E^%06lX\n", begaddr);
+  strcat(object, tmp);
+}
 
 int main(int argc, char **argv)
 {
-  FILE *file;
   if (argc != 2) {
-    printf("Usage: %s <sic source>\n", argv[0]);
-    return 0;
-  } else file = fopen(argv[1], "r");
+    fprintf(stdout, "Usage: %s <sic source>\n", argv[0]);
+    return 255;
+  }
 
+  FILE *file = fopen(argv[1], "r");
+  
+  char line[LINELEN];
+  char a[WORDLEN], b[WORDLEN], c[WORDLEN];
+  char scratch[SCRCHLEN];
   size_t tokc;
-  char *line = malloc(256);
-  char line_copy[256];
+  size_t lineno = 1;
+  unsigned long begaddr = 0;
+  unsigned long prglen = 0;
+
+  unsigned long locctr = 0;
   char *label, *opcode, *operand;
+  char intermediate[INTRMLEN] = "\0";
 
-  unsigned length = 0;
-  unsigned startaddr = 0;
-  char progname[16];
+  /* * * * * * */
+  /*  PASS  1  */
+  /* * * * * * */
 
-  char scratch[256];
-  char *intermediate = calloc(1024, sizeof (char));
-  char output[1024]; 
-
-  /* * * * * * * * */
-  /*    Pass 1.    */
-  /* * * * * * * * */
-
-  size_t locctr = 0;
-
-  while (fgets(line, 256, file) != NULL) {
-    strcpy(line_copy, line);
-    tokc = parse_line_1(line, strlen(line), &label, &opcode, &operand);
-
-    if (strcmp(opcode, "END") == 0)
-      break;
-
-    if (strcmp(opcode, "START") == 0) {
-      locctr = (unsigned) strtol(operand, NULL, 16);
-      append(&symtab, label, locctr);
-      startaddr = locctr;
-      strcpy(progname, label);
-      continue;
+  while (fgets(line, LINELEN, file) != NULL) {
+    lineno++;
+    tokc = sscanf(line, " %s %s %s", a, b, c);
+    switch (tokc) {
+        case 3:
+          label = a;
+          opcode = b;
+          operand = c;
+          break;
+        case 2:
+          label = NULL;
+          opcode = a;
+          operand = b;
+          break;
+        case 1:
+          label = NULL;
+          opcode = a;
+          operand = NULL;
+          break;
+        default:
+          fprintf(stderr, "error: invalid instruction: line %zu\n", lineno);
+          return 120;
     }
 
     if (label != NULL) {
-      if (lookup(symtab, label) >= 0) {
-        printf("error: redefining label: %s\n", label);
-        exit(10);
-      } else append(&symtab, label, locctr);
+      if (lookup(label, symtab) == true) {
+        fprintf(stderr, "error: redefining label: %s\n", label);
+        return 100;
+      } else {
+        strncpy(symtab.key[symtab.n], label, WORDLEN);
+        symtab.value[symtab.n] = locctr;
+        symtab.n++;
+      }
     }
 
-    if (strcmp(opcode, "WORD") == 0 || strcmp(opcode, "BYTE") == 0)
-      sprintf(line_copy, "%s\n", operand);
-    else if (strcmp(opcode, "RESW") == 0 || strcmp(opcode, "RESB") == 0)
-      sprintf(line_copy, "\n");
-    else if (tokc == 3 || tokc == 2)
-      sprintf(line_copy, "%s %s\n", opcode, operand);
+    if (strcmp(opcode, "START") == 0) {
+      locctr = strtol(operand, NULL, 16); 
+      begaddr = locctr;
+      continue;
+    } else if (strcmp(opcode, "END") == 0)
+      break;
 
-    sprintf(scratch, "%04zX %s", locctr, line_copy);
+    sprintf(scratch, "%04lX %8s %8s %8s\n",
+      locctr, label ? label : "*",
+      opcode, operand
+    );
 
-    if (lookup(optab, opcode) >= 0)
+    if (lookup(opcode, optab) == true)
       locctr += 3;
     else if (strcmp(opcode, "WORD") == 0)
       locctr += 3;
     else if (strcmp(opcode, "RESW") == 0)
-      locctr += 3 * (unsigned) strtoll(operand, NULL, 10);
-    else if (strcmp(opcode, "RESB") == 0)
-      locctr += (unsigned) strtoll(operand, NULL, 10);
-    else if (strcmp(opcode, "BYTE") == 0) 
+      locctr += strtol(operand, NULL, 10) * 3;
+    else if (strcmp(opcode, "RESB") == 0) {
+      long val = strtol(operand, NULL, 10);
+      locctr += 6 * (val / 6 + 1);
+    }
+    else if (strcmp(opcode, "BYTE") == 0)
       locctr += strlen(operand);
     else {
-      printf("error: unrecognized instruction: %s\n", opcode);
-      exit(10);
+      fprintf(stderr, "error: invalid opcode: %s\n", opcode);
+      return 110;
     }
 
     strcat(intermediate, scratch);
   }
 
-  length = locctr - startaddr;
+  prglen = locctr - begaddr;
+  fprintf(stdout, "Program Length %04lX\n", prglen);
+
+  fprintf(stdout, "%s", intermediate);
+  fprintf(stdout, "\n");
+  for (size_t i = 0; i < symtab.n; ++i)
+    fprintf(stdout, "%-8s : %04lX\n", symtab.key[i], symtab.value[i]);
   fclose(file);
 
-  printf("%s\n", intermediate);
-  print_mapping(symtab);
-  printf("\n");
+  /* * * * * * */
+  /*  PASS  2  */
+  /* * * * * * */
 
-  /* * * * * * * * */
-  /*    Pass 2.    */
-  /* * * * * * * * */
+  file = fmemopen(intermediate, strlen(intermediate), "r");
+  lineno = 1;
+  tokc = 0;
 
-  text_record tr = { .start = startaddr, .size = 0 };
-  printf("H^%s^%06x^%06x\n", progname, startaddr, length);
+  label = malloc(WORDLEN);
+  opcode = malloc(WORDLEN);
+  operand = malloc(WORDLEN);
+  locctr = 0;
 
-  while ((line = strsep(&intermediate, "\n")) != NULL) {
-    if (tr.size == 10) {
-      print_text_record(&tr);
-      continue;
-    }
+  write_hdr(symtab.key[0], begaddr, prglen);
+  while (fgets(line, LINELEN, file) != NULL) {
+    tokc = sscanf(line, "\n %04lX %s %s %s", &locctr, label, opcode, operand);
+    if (strcmp(opcode, "RESB") == 0) {
+      long val = strtol(operand, NULL, 10);
+      for (size_t i = 0; i < val; i += 6)
+        write_txt(begaddr, opcode, operand, false);
+    } else if (strcmp(opcode, "RESW") == 0) {
+      long val = strtol(operand, NULL, 10);
+      for (size_t i = 0; i < val; ++i)
+        write_txt(begaddr, opcode, operand, false);
+    } else
+      write_txt(begaddr, opcode, operand, false);
+  }
+  write_txt(begaddr, opcode, operand, true);
+  write_end(begaddr);
 
-    label = NULL;
-    opcode = NULL;
-    operand = NULL;
-    tokc = parse_line_2(line, strlen(line), &label, &opcode, &operand);
-   
-    if (operand != NULL)
-      sprintf(tr.record[tr.size], "%02X%04X",
-        optab.value[lookup(optab, opcode)],
-        symtab.value[lookup(symtab, operand)]
-      );
-    else if (opcode != NULL)
-      sprintf(tr.record[tr.size], "%06lX",
-        strtol(opcode, NULL, 16)
-      );
-    else continue;
-
-    tr.size++;
-  };
-  print_text_record(&tr);
-  printf("E^%X\n", startaddr);
-
+  fprintf(stdout, "\n%s", object);
+  free(label); free(opcode); free(operand);
   return 0;
 }
