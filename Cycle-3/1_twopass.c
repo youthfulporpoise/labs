@@ -54,10 +54,17 @@ void write_hdr(char *prgname, unsigned long begaddr, unsigned long prglen)
   strcat(object, tmp);
 }
 
+#define     WRITE_NEW_RECORD()                                        \
+  sprintf(tmp, "T^%06lX^%02lX%s\n", recbegaddr, txtrecbytes, txtrec); \
+  strcat(object, tmp);                                                \
+  recbegaddr += txtrecbytes;                                          \
+  txtrecbytes = 0;                                                    \
+  sprintf(txtrec, "");                                                \
+  sprintf(tmp, "");
+
 void write_txt(unsigned long begaddr, char *opcode, char *operand, bool forcewr)
 {
-  static size_t txtreccnt = 0;
-  static size_t txtreclen = 0;
+  static size_t txtrecbytes = 0;
   static size_t recbegaddr;
   static size_t recbegaddr_init = false;
 
@@ -66,32 +73,54 @@ void write_txt(unsigned long begaddr, char *opcode, char *operand, bool forcewr)
     recbegaddr_init = true;
   }
 
-  if (txtreccnt == 10 || forcewr) {
-    sprintf(tmp, "T^%06lX^%02lX%s\n", recbegaddr, txtreclen, txtrec);
-    strcat(object, tmp);
+  if (txtrecbytes == 30 || forcewr) { WRITE_NEW_RECORD(); }
 
-    recbegaddr += txtreclen;
-    txtreccnt = 0;
-    txtreclen = 0;
-    sprintf(txtrec, "");
-    sprintf(tmp, "");
-  }
-
-  if (strcmp(opcode, "WORD") == 0)
+  if (strcmp(opcode, "WORD") == 0) {
     sprintf(tmp, "^%06lX", strtol(operand, NULL, 10));
-  else if (strcmp(opcode, "RESB") == 0)
-    sprintf(tmp, "^xxxxxx");
-  else if (strcmp(opcode, "RESW") == 0)
-    sprintf(tmp, "^xxxxxx");
-  else
+    strcat(txtrec, tmp);
+    txtrecbytes += 3;
+  } else if (strcmp(opcode, "RESB") == 0) {
+    long len = strtol(operand, NULL, 10);
+    if (len > 0) strcat(txtrec, "^");
+    for (size_t i = 0; i < len; ++i) {
+      if (txtrecbytes == 30) {
+        WRITE_NEW_RECORD();
+        strcat(txtrec, "^");
+      }
+      strcat(txtrec, "xx");
+      txtrecbytes++;
+    }
+  } else if (strcmp(opcode, "RESW") == 0) {
+    long len = strtol(operand, NULL, 10);
+    if (len > 0) strcat(txtrec, "^");
+    for (size_t i = 0; i < len; ++i) {
+      if ((txtrecbytes + 3) > 30) {
+        WRITE_NEW_RECORD();
+        strcat(txtrec, "^");
+      }
+      strcat(txtrec, "xxxxxx");
+      txtrecbytes += 3;
+    }
+  } else if (strcmp(opcode, "BYTE") == 0) {
+    long len = strlen(operand);
+    if (len > 0) strcat(txtrec, "^");
+    for (size_t i = 2; i < (len - 1); ++i) {
+      if (txtrecbytes == 30) {
+        WRITE_NEW_RECORD();
+        strcat(txtrec, "^");
+      }
+      sprintf(tmp, "%02X", operand[i]);
+      strcat(txtrec, tmp);
+      txtrecbytes++;
+    }
+  } else {
     sprintf(tmp, "^%02lX%04lX",
       getvalue(opcode, optab),
       getvalue(operand, symtab)
     );
-
-  strcat(txtrec, tmp);
-  txtreccnt++;
-  txtreclen += 6;
+    txtrecbytes += 3; 
+    strcat(txtrec, tmp);
+  }
 }
 
 void write_end(unsigned long begaddr)
@@ -167,7 +196,7 @@ int main(int argc, char **argv)
     } else if (strcmp(opcode, "END") == 0)
       break;
 
-    sprintf(scratch, "%04lX %8s %8s %8s\n",
+    sprintf(scratch, "%04lX %12s %12s\t\t%s\n",
       locctr, label ? label : "*",
       opcode, operand
     );
@@ -179,8 +208,7 @@ int main(int argc, char **argv)
     else if (strcmp(opcode, "RESW") == 0)
       locctr += strtol(operand, NULL, 10) * 3;
     else if (strcmp(opcode, "RESB") == 0) {
-      long val = strtol(operand, NULL, 10);
-      locctr += 6 * (val / 6 + 1);
+      locctr += strtol(operand, NULL, 10);
     }
     else if (strcmp(opcode, "BYTE") == 0)
       locctr += strlen(operand);
@@ -193,7 +221,6 @@ int main(int argc, char **argv)
   }
 
   prglen = locctr - begaddr;
-  fprintf(stdout, "Program Length %04lX\n", prglen);
 
   fprintf(stdout, "%s", intermediate);
   fprintf(stdout, "\n");
@@ -217,16 +244,7 @@ int main(int argc, char **argv)
   write_hdr(symtab.key[0], begaddr, prglen);
   while (fgets(line, LINELEN, file) != NULL) {
     tokc = sscanf(line, "\n %04lX %s %s %s", &locctr, label, opcode, operand);
-    if (strcmp(opcode, "RESB") == 0) {
-      long val = strtol(operand, NULL, 10);
-      for (size_t i = 0; i < val; i += 6)
-        write_txt(begaddr, opcode, operand, false);
-    } else if (strcmp(opcode, "RESW") == 0) {
-      long val = strtol(operand, NULL, 10);
-      for (size_t i = 0; i < val; ++i)
-        write_txt(begaddr, opcode, operand, false);
-    } else
-      write_txt(begaddr, opcode, operand, false);
+    write_txt(begaddr, opcode, operand, false);
   }
   write_txt(begaddr, opcode, operand, true);
   write_end(begaddr);
