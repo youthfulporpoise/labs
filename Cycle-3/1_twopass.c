@@ -5,8 +5,8 @@
 
 #define   INTRMLEN    1024
 #define   SCRCHLEN    256
-#define   LINELEN     (32 * 3)
-#define   WORDLEN     32
+#define   LINELEN     256
+#define   WORDLEN     96
 #define   OBJCTLEN    1024
 
 typedef struct {
@@ -102,9 +102,12 @@ void write_txt(unsigned long begaddr, char *opcode, char *operand, bool forcewr)
       txtrecbytes += 3;
     }
   } else if (strcmp(opcode, "BYTE") == 0) {
+    sscanf(operand, "C'%[^']", tmp);
+    strcpy(operand, tmp);
+
     long len = strlen(operand);
     if (len > 0) strcat(txtrec, "^");
-    for (size_t i = 2; i < (len - 1); ++i) {
+    for (size_t i = 0; i < len; ++i) {
       if (txtrecbytes == 30) {
         WRITE_NEW_RECORD();
         strcat(txtrec, "^");
@@ -156,7 +159,7 @@ int main(int argc, char **argv)
 
   while (fgets(line, LINELEN, file) != NULL) {
     lineno++;
-    tokc = sscanf(line, " %s %s %s", a, b, c);
+    tokc = sscanf(line, " %s %s %[^\n]", a, b, c);
     switch (tokc) {
         case 3:
           label = a;
@@ -196,7 +199,7 @@ int main(int argc, char **argv)
     } else if (strcmp(opcode, "END") == 0)
       break;
 
-    sprintf(scratch, "%04lX %12s %12s\t\t%s\n",
+    sprintf(scratch, "%04lX %12s %8s  %s\n",
       locctr, label ? label : "*",
       opcode, operand
     );
@@ -233,6 +236,7 @@ int main(int argc, char **argv)
   /* * * * * * */
 
   file = fmemopen(intermediate, strlen(intermediate), "r");
+  line[0] = '\0';
   lineno = 1;
   tokc = 0;
 
@@ -243,7 +247,7 @@ int main(int argc, char **argv)
 
   write_hdr(symtab.key[0], begaddr, prglen);
   while (fgets(line, LINELEN, file) != NULL) {
-    tokc = sscanf(line, "\n %04lX %s %s %s", &locctr, label, opcode, operand);
+    tokc = sscanf(line, "\n %04lX %s %s %[^\n]", &locctr, label, opcode, operand);
     write_txt(begaddr, opcode, operand, false);
   }
   write_txt(begaddr, opcode, operand, true);
