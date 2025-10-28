@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 int main(int argc, char **argv)
 {
@@ -10,34 +11,36 @@ int main(int argc, char **argv)
     return 0;
   }
 
-  char *record = malloc(256),
-       *token;
-  size_t locctr = 0,
-         rec_per_line = 4,
-         rec_count = 4;
-  unsigned null;
+  char record[256];
+  long begaddr, prglen;
+  long bytecnt = 0;
 
   FILE *file = fopen(argv[1], "r");
-  printf("MEMORY");
 
+  fprintf(stdout, "MEMORY\r");
   while (fgets(record, 256, file) != NULL) {
     if (record[0] == 'H') {
-      for (size_t i = 0; i < 3; ++i)
-        token = strsep(&record, "^");
-      sscanf(token, "%zX", &locctr);
+      size_t i = 0;
+      while (isalpha(record[i]) || record[i] == '^')
+        i++;
+      sscanf(&record[i], "%06lX^%06lX", &begaddr, &prglen);
     } else if (record[0] == 'T') {
-      size_t i = 12;
-      while (record[i] != '\0') {
-        if (rec_count == rec_per_line) {
-          rec_count = 0;
-          printf("\n%zX  ", locctr);
-          locctr += 24;
-        }
-        if (record[i] == '^' || record[i] == '\n') {
-          printf("  ");
+      for (size_t i = 12; i < strlen(record); i += 2) {
+        if (record[i] == '^')
           i++;
-          rec_count++;
-        } else printf("%c", record[i++]);
+        else if (record[i] == '\n')
+          continue;
+
+        if (bytecnt % 12 == 0) {
+          fprintf(stdout, "\n%04lX", begaddr);
+          begaddr += 12;
+        }
+
+        if (bytecnt % 3 == 0)
+          fprintf(stdout, "\t");
+
+        fprintf(stdout, "%c%c", record[i], record[i + 1]);
+        bytecnt++;
       }
     }
   }
