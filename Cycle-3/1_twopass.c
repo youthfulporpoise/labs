@@ -46,7 +46,7 @@ long getvalue(char *key, char_int_map map) {
 
 char object[OBJCTLEN] = "\0",
      txtrec[SCRCHLEN] = "\0",
-     tmp[SCRCHLEN];
+     tmp[SCRCHLEN] = "\0";
 
 void write_hdr(char *prgname, unsigned long begaddr, unsigned long prglen)
 {
@@ -55,12 +55,14 @@ void write_hdr(char *prgname, unsigned long begaddr, unsigned long prglen)
 }
 
 #define     WRITE_NEW_RECORD()                                        \
+{                                                                     \
   sprintf(tmp, "T^%06lX^%02lX%s\n", recbegaddr, txtrecbytes, txtrec); \
   strcat(object, tmp);                                                \
   recbegaddr += txtrecbytes;                                          \
   txtrecbytes = 0;                                                    \
   sprintf(txtrec, "");                                                \
-  sprintf(tmp, "");
+  sprintf(tmp, "");                                                   \
+}
 
 void write_txt(unsigned long begaddr, char *opcode, char *operand, bool forcewr)
 {
@@ -73,7 +75,8 @@ void write_txt(unsigned long begaddr, char *opcode, char *operand, bool forcewr)
     recbegaddr_init = true;
   }
 
-  if (txtrecbytes == 30 || forcewr) { WRITE_NEW_RECORD(); }
+  if (txtrecbytes == 30 || txtrecbytes + 3 > 30 || forcewr)
+    WRITE_NEW_RECORD();
 
   if (strcmp(opcode, "WORD") == 0) {
     sprintf(tmp, "^%06lX", strtol(operand, NULL, 10));
@@ -253,7 +256,12 @@ int main(int argc, char **argv)
   write_txt(begaddr, opcode, operand, true);
   write_end(begaddr);
 
-  fprintf(stdout, "\n%s", object);
   free(label); free(opcode); free(operand);
+  fclose(file);
+
+  file = fopen("objfile.sico", "w");
+  fprintf(stdout, "\n%s", object);
+  fprintf(file, "%s", object);
+  fclose(file);
   return 0;
 }
