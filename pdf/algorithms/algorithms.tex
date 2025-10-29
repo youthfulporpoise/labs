@@ -1,0 +1,157 @@
+\documentclass[
+  11pt,
+  a4paper
+]{article}
+
+\usepackage{
+  microtype,
+  mlmodern,
+  mathtools,
+  amssymb,
+  algorithm,
+  algpseudocode,
+  caption
+}
+
+\newcommand{\OPCODE}{\mathtt{OPCODE}}
+\newcommand{\OPERAND}{\mathtt{OPERAND}}
+\newcommand{\LABEL}{\mathtt{LABEL}}
+
+\newcommand{\START}{\mathtt{START}}
+\newcommand{\END}{\mathtt{END}}
+\newcommand{\RESB}{\mathtt{RESB}}
+\newcommand{\RESW}{\mathtt{RESW}}
+\newcommand{\BYTE}{\mathtt{BYTE}}
+\newcommand{\WORD}{\mathtt{WORD}}
+
+\newcommand{\OPTAB}{\mathtt{OPTAB}}
+\newcommand{\SYMTAB}{\mathtt{SYMTAB}}
+\newcommand{\LOCCTR}{\mathtt{LOCCTR}}
+\newcommand{\STARTADDR}{\mathtt{STARTADDR}}
+
+\newcommand{\Header}{\texttt{Header}}
+\newcommand{\Text}{\texttt{Text}}
+\newcommand{\End}{\texttt{End}}
+
+\DeclareMathOperator{\StrLen}{StrLen}
+
+\newcommand{\AlgRule}{\vspace{1ex}\hrule\vspace{1ex}}
+
+\title{Algorithms for the Third Cycle: Two-Pass Assembler and Absolute Loader}
+\date{\itshape\today}
+
+\begin{document}
+\maketitle
+
+\begin{center}
+\captionof{algorithm}{First Pass of the Two-Pass Assembler}
+\begin{algorithmic}[1]
+  \AlgRule
+  \Statex \textbf{Input:} SIC source file
+  \Statex \textbf{Output:} intermediate file
+  \AlgRule
+  \State read first input line
+  \If {$\OPCODE = \START$}
+    \State $\STARTADDR \gets \OPERAND$
+    \State $\LOCCTR \gets \OPERAND$
+    \State write line to intermediate file
+    \State read next line
+  \Else
+    \State $\LOCCTR \gets 0$
+  \EndIf
+  \While {$\OPCODE \neq \END$}
+    \If {$\LABEL$ exists}
+      \State search $\SYMTAB$ for $\LABEL$
+      \If {found}
+        \State set error flag \Comment{duplicate symbol}
+      \Else
+        \State insert $(\LABEL,\LOCCTR)$ into $\SYMTAB$
+      \EndIf
+    \EndIf
+    \State search $\OPTAB$ for $\OPCODE$
+    \If {found}
+      \State $\LOCCTR \gets \LOCCTR + 3$
+    \ElsIf {$\OPCODE = \WORD$}
+      \State $\LOCCTR \gets \LOCCTR + 3$
+    \ElsIf {$\OPCODE = \RESW$}
+      \State $\LOCCTR \gets \LOCCTR + 3 \times \OPERAND$
+    \ElsIf {$\OPCODE = \RESB$}
+      \State $\LOCCTR \gets \LOCCTR + \OPERAND$
+    \ElsIf {$\OPCODE = \BYTE$}
+      \State $\LOCCTR \gets \LOCCTR + \StrLen(\OPERAND)$
+    \Else
+      \State set error flag \Comment{invalid operation code}
+  \EndIf
+  \State write line to intermediate file
+  \State read next input line
+  \EndWhile
+  \State write last line to intermediate file
+  \State save $\LOCCTR - \STARTADDR$ as program length
+  \AlgRule
+\end{algorithmic}
+\end{center}
+
+\begin{center}
+\captionof{algorithm}{Second Pass of the Two-Pass Assembler}
+\begin{algorithmic}[1]
+  \AlgRule
+  \Statex \textbf{Input:} intermediate file
+  \Statex \textbf{Output:} object program
+  \AlgRule
+  \State read first input line
+  \State write \Header\ record
+  \State initialize first \Text\ record
+  \While {$\OPCODE \neq \END$}
+    \State search $\OPTAB$ for $\OPCODE$
+    \If {found}
+      \If {$\OPERAND$ exists}
+        \State search $\SYMTAB$ for $\OPERAND$
+        \If {found}
+          \State store symbol value as operand address
+        \Else
+          \State store $0$ as operand address
+          \State set error flag \Comment{undefined symbol}
+        \EndIf
+      \Else
+        \State store $0$ as operand address
+      \EndIf
+        \State assemble the object code instruction
+    \ElsIf {$\OPCODE = \BYTE \lor \OPCODE = \WORD$}
+      \State convert $\OPERAND$ to object code
+      \If {object \emph{will not} fit into the \Text\ record}
+        \State write \Text\ record
+        \State initialize new \Text\ record
+      \EndIf
+    \EndIf
+    \State add object code to \Text\ record
+    \State write listing line
+    \State read next input line
+  \EndWhile
+  \State write last \Text\ record
+  \State write \End\ record
+  \State write last listing line
+  \AlgRule
+\end{algorithmic}
+\end{center}
+
+\begin{center}
+\captionof{algorithm}{Absolute Loader}
+\begin{algorithmic}[1]
+  \AlgRule
+  \Statex \textbf{Input:} object program
+  \Statex \textbf{Output:} program in memory
+  \AlgRule
+  \State read \Header\ record
+  \State verify program name and length
+  \State read first \Text\ record
+  \While {not an \End\ record}
+    \State convert object code into internal representation
+    \State move object code to specified location in memory
+    \State read next record
+  \EndWhile
+  \State jump to address specified in \End\ record
+  \AlgRule
+\end{algorithmic}
+\end{center}
+
+\end{document}
