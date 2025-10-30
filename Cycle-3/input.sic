@@ -1,17 +1,19 @@
-SCOPY   START 1000
-        LDA   ONE
-        STA   TWO
-        COMP  TWO
-        JEQ   SCOPY
-EXIT    TIX   TWELVE
-        JGT   SCOPY
-        LDX   TWO
-        STX   ONE
-        ADD   EIGHT
-        SUB   SIXTY
-ONE     WORD  1
-TWO     WORD  2
-EIGHT   WORD  8
-TWELVE  WORD  12
-SIXTY   WORD  16
-        END
+          START   2552
+SCOPY     LDA     ONE
+          STA     TWO
+          COMP    TWO
+          JEQ     SCOPY
+EXIT      TIX     TWELVE
+          JGT     SCOPY
+          LDX     TWO
+          STX     ONE
+          ADD     EIGHT
+          SUB     SIXTY
+REPLY     RESB    17
+ONE       WORD    1
+TWO       WORD    2
+EIGHT     WORD    8
+QUESTION  BYTE    C'What is your name?'
+TWELVE    WORD    12
+SIXTY     WORD    60
+          END
