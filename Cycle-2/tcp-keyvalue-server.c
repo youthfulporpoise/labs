@@ -58,7 +58,7 @@ int main(int argc, char **argv)
 {
   struct sockaddr_in srvaddr;
   srvaddr.sin_family = AF_INET;
-  srvaddr.sin_port = htons(8090);
+  srvaddr.sin_port = htons(8091);
   srvaddr.sin_addr.s_addr = htons(INADDR_ANY);
 
   int sockfd = socket(PF_INET, SOCK_STREAM, 0);
