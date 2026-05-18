@@ -1,3 +1,4 @@
+*.swp
 *.out
 input*.txt
 pass.txt
