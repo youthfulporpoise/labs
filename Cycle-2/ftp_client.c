@@ -7,12 +7,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-/* import list
- *
- * arpa/inet.h - inet_addr
- */
-
-#define     BUFSIZE     1024
+#define     BUFSIZE     4096
 
 
 int ret;
@@ -30,7 +25,7 @@ void interrupt(char *msg, int code)
 
 int main(int argc, char **argv)
 {
-  if (argc != 2) {
+  if (argc != 3) {
     printf("Usage: %s <ip address> <port number>\n", argv[0]);
     return 0;
   }
@@ -51,56 +46,35 @@ int main(int argc, char **argv)
     interrupt("[err] establish connection failed", 1);
 
   while (true) {
-    printf("> ");
-    scanf("%s %[^\n]", cmd, filename);
+    printf("ftp> ");
+    scanf(" %s", cmd);
 
-    if (strcmp(cmd, "bye") == 0) {
-      strcpy(buffer, "CLOSE_CXN");
-      sendto(sockfd, buffer, sizeof buffer, 0, (struct sockaddr*) &srvaddr, srvaddr_size);
-      break;
-
-    } else if (strcmp(cmd, "put") == 0) {
-      /* put file */
-
-      strcpy(buffer, "FILE_READY");
-      sendto(sockfd, buffer, sizeof buffer, 0, (struct sockaddr*) &srvaddr, srvaddr_size);
+    send(sockfd, cmd, strlen(cmd) + 1, 0);
+    if (!strcmp(cmd, "PUT")) {
+      scanf(" %[^\n]", filename);
+      send(sockfd, filename, strlen(filename) + 1, 0);
 
       FILE *file = fopen(filename, "r");
-      int c;
-      while ((c = fgetc(file)) != EOF)
-        sendto(sockfd, &c, sizeof c, 0, (struct sockaddr*) &srvaddr, srvaddr_size);
+      int count = fread(buffer, sizeof (char), sizeof buffer - 1, file);
       fclose(file);
 
-    } else if (strcmp(cmd, "get") == 0) {
-      /* get file */
-      
-      sprintf(buffer, "GET %s", filename);
-      sendto(sockfd, buffer, sizeof buffer, 0, (struct sockaddr*) &srvaddr, srvaddr_size);
+      send(sockfd, buffer, count, 0);
 
-      recvfrom(sockfd, buffer, sizeof buffer, 0, (struct sockaddr*) &srvaddr, &srvaddr_size);
-      if (strcmp(buffer, "FILE_READY") != 0)
-        break;
+    } else if (!strcmp(cmd, "GET")) {
+      scanf(" %[^\n]", filename);
+      send(sockfd, filename, strlen(filename) + 1, 0);
+      int count = recv(sockfd, buffer, sizeof buffer - 1, 0);
 
-      FILE *file = fopen(filename, "a");
-      int c;
-      while (c != EOF) {
-        recvfrom(sockfd, &c, sizeof c, 0, (struct sockaddr*) &srvaddr, &srvaddr_size);
-        fputc(c, file);
-      }
+      FILE *file = fopen(filename, "w");
+      fwrite(buffer, sizeof (char), count, file);
       fclose(file);
 
-    } else {
-      printf("%s: invalid cmd\n", cmd);
+    } else if (!strcmp(cmd, "QUIT")) {
+      puts("Exiting...");
       break;
     }
-
-    /* transaction end status */
-
-    recvfrom(sockfd, buffer, sizeof buffer, 0, (struct sockaddr*) &srvaddr, &srvaddr_size);
-    printf("[in] %s\n", buffer);
   }
 
   close(sockfd);
-
   return 0;
 }
