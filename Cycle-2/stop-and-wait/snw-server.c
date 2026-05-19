@@ -57,15 +57,15 @@ int main(int argc, char **argv)
     recvfrom(sockfd, &seq, sizeof seq, 0, (struct sockaddr*) &cliaddr, &cliaddr_size);
     if (rand() % 4 == 0) {
       sendto(sockfd, &nak, sizeof nak, 0, (struct sockaddr*) &cliaddr, cliaddr_size);
-      printf("[nak] timeout: NAK");
+      printf("[nak] timeout: NAK\n");
     } else if (seq == ack) {
       ack = 1 - seq;
       sendto(sockfd, &ack, sizeof ack, 0, (struct sockaddr*) &cliaddr, cliaddr_size);
-      printf("[ack] correct frame: ACK %d\n", seq);
+      printf("[ack] correct frame: ACK %d\n", ack);
       sent++;
     } else {
       sendto(sockfd, &nak, sizeof nak, 0, (struct sockaddr*) &cliaddr, cliaddr_size);
-      printf("[nak] incorrect: NAK");
+      printf("[nak] incorrect: NAK\n");
     }
   }
 
