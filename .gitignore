@@ -1,4 +1,6 @@
 *.swp
 *.out
 input*.txt
+*input*.txt
+*output*.txt
 pass.txt
