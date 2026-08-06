@@ -27,9 +27,6 @@ char buffer[BUFSZ];
 char stack[STKSZ];
 size_t t = 0;
 
-char redstk[STKSZ];
-size_t tr = 0;
-
 
 /* Return whether terminal or not.
  */
@@ -126,11 +123,10 @@ void op_parse(char *input)
 
   size_t i = 0;
   while (input[i] != '$' || strlen(stack) > 2) {
+    /* Just in case if t happens go below 1
+     */ 
     if (t < 1)
       break;
-
-    // printf("\nNext?\n");
-    // scanf("%*c");
 
     a = get_top_terminal();
     b = input[i];
