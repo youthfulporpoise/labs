@@ -3,17 +3,12 @@
 #include <stdbool.h>
 #include <string.h>
 #include <limits.h>
+#include <signal.h>
 
 #define       ARRSZ       256
 #define       BUFSZ       2048
 #define       STKSZ       512
 
-
-struct op_val {
-  char c;
-  ssize_t v;
-} ipsym[ARRSZ];
-size_t ipsym_n;
 
 struct production {
   char c;
@@ -84,12 +79,11 @@ void sr_parse(char *input)
 
     stack[t] = '\0';
     printf(
-      "(%c) [ %-16s ] [ %16s ] (%c) <%zu>\n",
+      "(%c) [ %-16s ] [ %16s ] (%c)\n",
       stack[t - 1],
       stack,
       input + i,
-      input[i],
-      t
+      input[i]
     );
 
     size_t t_bk = t;
@@ -116,8 +110,6 @@ void sr_parse(char *input)
     }
   }
 
-  printf("(%c) [ %-16s ] [ %16s ] (%c)\n", stack[t - 1], stack, input + i, input[i]);
-
   check_accepted:
     sprintf(buffer, "$%c", grmr[0].c);
     if (strcmp(buffer, stack) == 0)
@@ -128,19 +120,18 @@ void sr_parse(char *input)
   t = 0;
 }
 
+/* Catch the interrupt signal and handle
+ */
+void handle_sigint(int sig)
+{
+  printf("\nExiting...\n");
+  exit(sig);
+}
+
+
 int main(int argc, char **argv)
 {
-  // printf("Number of terminal symbols: ");
-  // scanf(" %zu", &ipsym_n);
-  // ipsym_n += 1;
-
-  // printf("<Symbol> <Precedence>:\n");
-  // printf("$ 0\n");
-  // ipsym[0].c = '$';
-  // ipsym[0].v = -1;
-
-  // for (size_t i = 1; i < ipsym_n; ++i)
-  //   scanf(" %c %zu", &ipsym[i].c, &ipsym[i].v);
+  signal(SIGINT, handle_sigint);
 
   printf("No. of grammar nonterminal symbols: ");
   scanf(" %zu", &grmr_n);
